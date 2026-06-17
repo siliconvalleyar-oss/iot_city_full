@@ -1,0 +1,6 @@
+# --- Monorepo IoT City ---
+# Cada proyecto vive en su propia rama.
+# En main solo está este README.
+
+iot_city_web/
+iot_city_flt/
