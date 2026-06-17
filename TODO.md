@@ -1,11 +1,11 @@
-# 📋 IoT City — Plan de Trabajo y Roadmap
+# IoT City Web — Plan de Trabajo y Roadmap
 
-> **Última actualización:** Junio 2026  
-> **Próximo hito:** v1.1.0 — Dashboard Flutter y persistencia SQL
+> **Última actualización:** Junio 2026
+> **Próximo hito:** v1.1.0
 
 ---
 
-## ✅ Completado (v1.0.0)
+## Completado (v1.0.0)
 
 - [x] Backend FastAPI con API REST completa
 - [x] WebSocket en tiempo real para actualizaciones
@@ -14,7 +14,7 @@
 - [x] Simulador de gateways MQTT (3 zonas)
 - [x] Motor de métricas energéticas NodeEnergyModel
 - [x] 5 algoritmos de optimización energética
-- [x] Dashboard energético con Chart.js
+- [x] Dashboard energético con Chart.js (6 pestañas)
 - [x] Heatmap de consumo sobre vista ciudad
 - [x] Scripts de instalación y control
 - [x] Gestión de paletas de colores (5 temas)
@@ -24,15 +24,15 @@
 
 ---
 
-## 🔜 Próximas Tareas (Corto Plazo)
+## Próximas Tareas (Corto Plazo)
 
 ### Prioridad Alta
 
+- [ ] **Fix puerto ocupado**: Error `[Errno 98] Address already in use` al iniciar backend. Revisar cierre limpio de uvicorn.
 - [ ] **Persistencia SQLite**: Migrar de JSON a SQLite para mejor integridad y consultas
 - [ ] **Autenticación**: Sistema de login (JWT) para endpoints de admin
 - [ ] **Swagger completo**: Documentación interactiva completa de todos los endpoints
 - [ ] **Tests unitarios**: Tests para backend, simulador y dashboard
-- [ ] **i18n**: Soporte multi-idioma (ES/EN/PT)
 
 ### Prioridad Media
 
@@ -49,53 +49,47 @@
 
 ---
 
-## 🚀 Roadmap (Mediano Plazo)
+## Roadmap (Mediano Plazo)
 
-### v1.1.0 — Dashboard Flutter
+### v1.1.0 — Dashboard Flutter + Persistencia
 
-- [ ] Aplicación Flutter (`iot_city_flt`) con:
-  - Dashboard moderno con fondo oscuro/gradiente
-  - Gráficos de líneas, barras y gauges circulares
-  - Paneles de Revenue, Total Sales, Transacciones, Customer Rate
-  - Filtros por día/semana/mes/semestre
-  - Animaciones suaves
-  - Paletas de colores (20 opciones)
-- [ ] Compatibilidad con Android 16.0
-- [ ] Integración con backend existente vía API
+- [ ] App Flutter con dashboard moderno conectado al backend
+- [ ] SQLite para datos persistentes
+- [ ] Autenticación JWT
 
 ### v1.2.0 — Modo Producción
 
-- [ ] **Base de datos PostgreSQL** (alternativa a SQLite)
-- [ ] **Redis** para caché de métricas
-- [ ] **Rate limiting** en API
-- [ ] **SSL/TLS** para WebSocket y API
-- [ ] **Monitoreo** con Prometheus + Grafana
-- [ ] **CI/CD** pipeline (GitHub Actions)
+- [ ] PostgreSQL (alternativa a SQLite)
+- [ ] Redis para caché de métricas
+- [ ] Rate limiting en API
+- [ ] SSL/TLS para WebSocket y API
+- [ ] Monitoreo con Prometheus + Grafana
+- [ ] CI/CD pipeline (GitHub Actions)
 
 ### v1.3.0 — IoT Real
 
-- [ ] **Soporte hardware real** MRF24J40 + ATmega
-- [ ] **Firmware completo** para nodos reales
-- [ ] **OTA updates** para firmware
-- [ ] **Dashboard móvil** (Flutter)
-- [ ] **MQTT nativo** con broker dedicado
+- [ ] Soporte hardware real MRF24J40 + ATmega
+- [ ] Firmware completo para nodos reales
+- [ ] OTA updates para firmware
+- [ ] MQTT nativo con broker dedicado
 
 ### v2.0.0 — Smart City
 
-- [ ] **Machine Learning** para predicción de consumo
-- [ ] **Gemelos digitales** de la ciudad
-- [ ] **GIS integración** (GeoJSON, mapas reales)
-- [ ] **APIs abiertas** para desarrolladores
-- [ ] **Dashboard público** con métricas agregadas
+- [ ] Machine Learning para predicción de consumo
+- [ ] Gemelos digitales de la ciudad
+- [ ] GIS integración (GeoJSON, mapas reales)
+- [ ] APIs abiertas para desarrolladores
+- [ ] Dashboard público con métricas agregadas
 
 ---
 
-## 🐛 Issues Conocidos
+## Issues Conocidos
 
 ### Backend
 - [ ] `dashboard_patch.py` puede fallar si no se inicializa correctamente
 - [ ] Los snapshots de métricas se acumulan sin límite en `data/metrics/`
 - [ ] No hay límite de conexiones WebSocket simultáneas
+- [ ] Puerto 5062 puede quedar ocupado tras cierre abrupto
 
 ### Dashboard
 - [ ] El heatmap no se redimensiona correctamente en pantallas pequeñas
@@ -113,7 +107,7 @@
 
 ---
 
-## 📚 Deuda Técnica
+## Deuda Técnica
 
 - [ ] Refactorizar `backend/main.py` en módulos más pequeños
 - [ ] Estandarizar naming de variables (mezcla ES/EN)
@@ -122,22 +116,3 @@
 - [ ] Crear constantes para magic strings y números
 - [ ] Agregar logging estructurado (JSON)
 - [ ] Estandarizar formato de respuestas API
-
----
-
-## 📊 Métricas de Progreso
-
-| Componente | Estado | Cobertura | Prioridad |
-|------------|--------|-----------|-----------|
-| Backend API | ✅ 100% | — | — |
-| WebSocket | ✅ 100% | — | — |
-| Mapa Interactivo | ✅ 100% | — | — |
-| Simulador Mesh | ✅ 95% | — | Media |
-| Gateway MQTT | ✅ 90% | — | Media |
-| Metrics Engine | ✅ 85% | — | Alta |
-| Energy Optimizer | ✅ 80% | — | Alta |
-| Dashboard | ✅ 75% | — | Alta |
-| Tests | ❌ 0% | 0% | Alta |
-| Documentación | ✅ 70% | — | Media |
-| Docker | ✅ 80% | — | Baja |
-| Seguridad | ❌ 10% | — | Alta |
