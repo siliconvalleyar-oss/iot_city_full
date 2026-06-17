@@ -34,7 +34,7 @@ Configurable desde **File > Configure Host** (Ctrl+H).
 ## Estructura
 
 ```
-iot_qt/
+iot_city_qt/
 ├── assets/              # Recursos (icon.png)
 ├── src/
 │   ├── main.cpp         # Entry point + splash screen

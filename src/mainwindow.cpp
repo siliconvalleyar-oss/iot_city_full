@@ -117,6 +117,9 @@ void MainWindow::onDevicesReceived(const QJsonDocument &doc) {
         m_devices[dev.id] = dev;
     }
     m_map->setDevices(m_devices);
+    QString sel = m_map->selectedDevice();
+    if (!sel.isEmpty() && m_devices.contains(sel))
+        m_devicePanel->showDevice(m_devices[sel]);
     statusBar()->showMessage(QString("Devices: %1").arg(m_devices.size()), 3000);
 }
 
@@ -150,10 +153,14 @@ void MainWindow::onDeviceSelected(const QString &id) {
 }
 
 void MainWindow::onToggleDevice(const QString &id) {
-    m_api->toggleDevice(id, [this](const QJsonDocument &){ refreshAll(); }, [this](const QString &e){ statusBar()->showMessage("Toggle error: " + e, 5000); });
+    m_api->toggleDevice(id,
+        [this](const QJsonDocument &){ refreshAll(); },
+        [this](const QString &e){ refreshAll(); statusBar()->showMessage("Toggle error: " + e, 5000); });
 }
 void MainWindow::onPowerDevice(const QString &id) {
-    m_api->togglePower(id, [this](const QJsonDocument &){ refreshAll(); }, [this](const QString &e){ statusBar()->showMessage("Power error: " + e, 5000); });
+    m_api->togglePower(id,
+        [this](const QJsonDocument &){ refreshAll(); },
+        [this](const QString &e){ refreshAll(); statusBar()->showMessage("Power error: " + e, 5000); });
 }
 void MainWindow::onDeleteDevice(const QString &id) {
     if (QMessageBox::question(this, "Delete Device", "Delete " + id + "?") == QMessageBox::Yes)

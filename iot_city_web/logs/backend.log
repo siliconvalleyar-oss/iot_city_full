@@ -1,0 +1,9 @@
+/mnt/disk/src/flutter_src/iot_city/iot_city_web/backend/main.py:684: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Will watch for changes in these directories: ['/mnt/disk/src/flutter_src/iot_city/iot_city_web/backend']
+ERROR:    [Errno 98] Address already in use

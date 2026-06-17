@@ -1,0 +1,6 @@
+#!/home/optimus/Documentos/src/flutter_src/iot_city/iot_city_web/venv/bin/python
+import sys
+from websockets.cli import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())

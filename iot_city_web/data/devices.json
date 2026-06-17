@@ -1,0 +1,532 @@
+{
+  "RTR_001": {
+    "id": "RTR_001",
+    "x": 663.0,
+    "y": 284.5,
+    "street": "Calle Sarmiento",
+    "device_type": "router",
+    "active": true,
+    "powered": true,
+    "level": 92.3,
+    "consumption": 96.8,
+    "icon": "router",
+    "color": "#FFD700",
+    "connected_to": [
+      "RTR_004",
+      "RTR_007"
+    ],
+    "end_devices": [
+      "END_004",
+      "END_010",
+      "END_011"
+    ],
+    "last_seen": 1781677340.7284243,
+    "signal": -50.6,
+    "packets_sent": 623,
+    "packets_received": 123
+  },
+  "RTR_002": {
+    "id": "RTR_002",
+    "x": 238.5,
+    "y": 194.9,
+    "street": "Calle Italia",
+    "device_type": "router",
+    "active": true,
+    "powered": true,
+    "level": 73.0,
+    "consumption": 62.1,
+    "icon": "router",
+    "color": "#FFD700",
+    "connected_to": [
+      "RTR_008",
+      "RTR_003"
+    ],
+    "end_devices": [
+      "END_006"
+    ],
+    "last_seen": 1781677340.7284243,
+    "signal": -48.7,
+    "packets_sent": 996,
+    "packets_received": 219
+  },
+  "RTR_003": {
+    "id": "RTR_003",
+    "x": 147.3,
+    "y": 387.5,
+    "street": "Calle Belgrano",
+    "device_type": "router",
+    "active": true,
+    "powered": true,
+    "level": 93.8,
+    "consumption": 113.9,
+    "icon": "router",
+    "color": "#FFD700",
+    "connected_to": [
+      "RTR_002",
+      "RTR_008"
+    ],
+    "end_devices": [
+      "END_001",
+      "END_007"
+    ],
+    "last_seen": 1781677340.7284243,
+    "signal": -52.9,
+    "packets_sent": 856,
+    "packets_received": 808,
+    "cameras": [
+      "CAM_001"
+    ]
+  },
+  "RTR_004": {
+    "id": "RTR_004",
+    "x": 607.2,
+    "y": 136.4,
+    "street": "Calle Moreno",
+    "device_type": "router",
+    "active": true,
+    "powered": true,
+    "level": 84.7,
+    "consumption": 57.0,
+    "icon": "router",
+    "color": "#FFD700",
+    "connected_to": [
+      "RTR_001",
+      "RTR_005"
+    ],
+    "end_devices": [
+      "END_003"
+    ],
+    "last_seen": 1781677340.7284243,
+    "signal": -58.3,
+    "packets_sent": 554,
+    "packets_received": 147
+  },
+  "RTR_005": {
+    "id": "RTR_005",
+    "x": 460.5,
+    "y": 200.0,
+    "street": "Calle Moreno",
+    "device_type": "router",
+    "active": true,
+    "powered": true,
+    "level": 82.5,
+    "consumption": 131.6,
+    "icon": "router",
+    "color": "#FFD700",
+    "connected_to": [
+      "RTR_006",
+      "RTR_004"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -55.3,
+    "packets_sent": 967,
+    "packets_received": 574
+  },
+  "RTR_006": {
+    "id": "RTR_006",
+    "x": 453.0,
+    "y": 53.9,
+    "street": "Calle Sarmiento",
+    "device_type": "router",
+    "active": true,
+    "powered": true,
+    "level": 89.2,
+    "consumption": 102.1,
+    "icon": "router",
+    "color": "#FFD700",
+    "connected_to": [
+      "RTR_005",
+      "RTR_004"
+    ],
+    "end_devices": [
+      "END_002",
+      "END_005",
+      "END_012"
+    ],
+    "last_seen": 1781677340.7284243,
+    "signal": -42.9,
+    "packets_sent": 808,
+    "packets_received": 344
+  },
+  "RTR_007": {
+    "id": "RTR_007",
+    "x": 481.4,
+    "y": 405.9,
+    "street": "Av. San Mart\u00edn",
+    "device_type": "router",
+    "active": true,
+    "powered": true,
+    "level": 99.6,
+    "consumption": 139.6,
+    "icon": "router",
+    "color": "#FFD700",
+    "connected_to": [
+      "RTR_005",
+      "RTR_001"
+    ],
+    "end_devices": [
+      "END_008",
+      "END_009"
+    ],
+    "last_seen": 1781677340.7284243,
+    "signal": -43.6,
+    "packets_sent": 541,
+    "packets_received": 767,
+    "cameras": [
+      "CAM_002"
+    ]
+  },
+  "RTR_008": {
+    "id": "RTR_008",
+    "x": 113.2,
+    "y": 65.1,
+    "street": "Av. Corrientes",
+    "device_type": "router",
+    "active": true,
+    "powered": true,
+    "level": 88.7,
+    "consumption": 62.1,
+    "icon": "router",
+    "color": "#FFD700",
+    "connected_to": [
+      "RTR_002",
+      "RTR_003"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -40.9,
+    "packets_sent": 170,
+    "packets_received": 685,
+    "cameras": [
+      "CAM_003"
+    ]
+  },
+  "END_001": {
+    "id": "END_001",
+    "x": 77.8,
+    "y": 354.9,
+    "street": "Av. Mitre",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 73.5,
+    "consumption": 78.9,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_003",
+      "RTR_002"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -67.0,
+    "packets_sent": 37,
+    "packets_received": 100
+  },
+  "END_002": {
+    "id": "END_002",
+    "x": 400.8,
+    "y": 88.8,
+    "street": "Av. Mitre",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 93.4,
+    "consumption": 46.2,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_006",
+      "RTR_005"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -73.6,
+    "packets_sent": 24,
+    "packets_received": 91
+  },
+  "END_003": {
+    "id": "END_003",
+    "x": 559.7,
+    "y": 142.6,
+    "street": "Av. Rivadavia",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 83.1,
+    "consumption": 22.1,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_004",
+      "RTR_005"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -63.6,
+    "packets_sent": 55,
+    "packets_received": 88
+  },
+  "END_004": {
+    "id": "END_004",
+    "x": 760.1,
+    "y": 261.1,
+    "street": "Av. Rivadavia",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 83.4,
+    "consumption": 69.1,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_001",
+      "RTR_004"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -50.8,
+    "packets_sent": 35,
+    "packets_received": 145
+  },
+  "END_005": {
+    "id": "END_005",
+    "x": 368.1,
+    "y": 10,
+    "street": "Av. Mitre",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 65.3,
+    "consumption": 21.6,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_006",
+      "RTR_005"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -74.9,
+    "packets_sent": 32,
+    "packets_received": 126
+  },
+  "END_006": {
+    "id": "END_006",
+    "x": 219.1,
+    "y": 135.8,
+    "street": "Av. Corrientes",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 92.3,
+    "consumption": 51.8,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_002",
+      "RTR_008"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -51.9,
+    "packets_sent": 200,
+    "packets_received": 190
+  },
+  "END_007": {
+    "id": "END_007",
+    "x": 190.8,
+    "y": 490,
+    "street": "Calle Moreno",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 88.2,
+    "consumption": 64.0,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_003",
+      "RTR_002"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -60.0,
+    "packets_sent": 17,
+    "packets_received": 139
+  },
+  "END_008": {
+    "id": "END_008",
+    "x": 440.1,
+    "y": 427.8,
+    "street": "Av. 9 de Julio",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 93.7,
+    "consumption": 29.3,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_007",
+      "RTR_005"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -75.1,
+    "packets_sent": 89,
+    "packets_received": 62
+  },
+  "END_009": {
+    "id": "END_009",
+    "x": 550.0,
+    "y": 419.8,
+    "street": "Calle Italia",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 60.3,
+    "consumption": 21.2,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_007",
+      "RTR_001"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -53.1,
+    "packets_sent": 82,
+    "packets_received": 119
+  },
+  "END_010": {
+    "id": "END_010",
+    "x": 583.8,
+    "y": 350.7,
+    "street": "Av. Rivadavia",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 78.2,
+    "consumption": 50.1,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_001",
+      "RTR_007"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -60.3,
+    "packets_sent": 101,
+    "packets_received": 184
+  },
+  "END_011": {
+    "id": "END_011",
+    "x": 716.6,
+    "y": 240.8,
+    "street": "Av. Roca",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 87.8,
+    "consumption": 50.1,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_001",
+      "RTR_004"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -69.1,
+    "packets_sent": 77,
+    "packets_received": 128
+  },
+  "END_012": {
+    "id": "END_012",
+    "x": 373.7,
+    "y": 56.1,
+    "street": "Calle Florida",
+    "device_type": "end_device",
+    "active": true,
+    "powered": true,
+    "level": 60.9,
+    "consumption": 77.1,
+    "icon": "lamp",
+    "color": "#00BFFF",
+    "connected_to": [
+      "RTR_006",
+      "RTR_005"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -63.1,
+    "packets_sent": 100,
+    "packets_received": 154
+  },
+  "CAM_001": {
+    "id": "CAM_001",
+    "x": 61.2,
+    "y": 415.0,
+    "street": "Av. 9 de Julio",
+    "device_type": "camera",
+    "active": true,
+    "powered": true,
+    "level": 76.2,
+    "consumption": 34.9,
+    "icon": "camera",
+    "color": "#FF6B6B",
+    "connected_to": [
+      "RTR_003"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -55.0,
+    "packets_sent": 1383,
+    "packets_received": 250
+  },
+  "CAM_002": {
+    "id": "CAM_002",
+    "x": 517.6,
+    "y": 383.0,
+    "street": "Calle Florida",
+    "device_type": "camera",
+    "active": true,
+    "powered": true,
+    "level": 89.9,
+    "consumption": 25.7,
+    "icon": "camera",
+    "color": "#FF6B6B",
+    "connected_to": [
+      "RTR_007"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -57.3,
+    "packets_sent": 217,
+    "packets_received": 156
+  },
+  "CAM_003": {
+    "id": "CAM_003",
+    "x": 134.6,
+    "y": 20.5,
+    "street": "Av. Roca",
+    "device_type": "camera",
+    "active": true,
+    "powered": true,
+    "level": 82.4,
+    "consumption": 21.0,
+    "icon": "camera",
+    "color": "#FF6B6B",
+    "connected_to": [
+      "RTR_008"
+    ],
+    "end_devices": [],
+    "last_seen": 1781677340.7284243,
+    "signal": -51.1,
+    "packets_sent": 307,
+    "packets_received": 460
+  }
+}

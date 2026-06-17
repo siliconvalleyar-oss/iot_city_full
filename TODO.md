@@ -4,10 +4,11 @@
 
 ## Prioridad Alta
 
-- [ ] **Toggle/Power arreglar 500 del backend** — El endpoint `POST /api/devices/{id}/toggle` devuelve Internal Server Error. Revisar el broadcast WebSocket en el backend.
 - [ ] **Soporte multi-idioma** — Internacionalización con `QTranslator` + archivos `.ts` (es/en).
 - [ ] **Persistencia de posición** — Guardar y restaurar posición de dispositivos arrastrados en el mapa.
 - [ ] **Autenticación** — Login screen + token JWT para comunicación con el backend.
+- [ ] **Más datos del dashboard** — Agregar energy accumulated, efficiency score, top consumers, doughnut chart, zonas, tráfico, heatmap, optimización, tabla de nodos (como en web).
+- [ ] **Panel de dispositivo completo** — Mostrar calle, coordenadas, level bar, packets TX/RX, connected to, end devices.
 
 ## Prioridad Media
 
@@ -18,6 +19,7 @@
 - [ ] **Historial de logs** — Filtros por tipo de evento, búsqueda, exportar CSV.
 - [ ] **Tema oscuro/claro** — Selector de paleta sincronizado con el backend.
 - [ ] **Zoom automático** — Fit mapa al tamaño de la ventana, mantener relación 800x600.
+- [ ] **Filtros de dispositivos** — Botones para filtrar por tipo (routers, end devices, cameras, sin power).
 
 ## Prioridad Baja
 
@@ -28,12 +30,14 @@
 - [ ] **Soporte Qt6 Charts** — Probar y asegurar compatibilidad total con Qt 6.x.
 - [ ] **Animaciones UI** — Transiciones suaves entre tabs, fade en device panel.
 - [ ] **Shortcuts personalizables** — Diálogo de configuración de atajos de teclado.
+- [ ] **Tooltip hover en mapa** — Mostrar info del dispositivo al pasar el mouse.
 
 ## Bugs Conocidos
 
-- [ ] Toggle/Power: backend retorna 500 (ver prioridad alta)
+- [ ] Toggle/Power: backend retorna 500 (revisar broadcast() en backend)
 - [ ] Labels en mapa: emoji icons pueden no renderizar si falta fuente emoji en el sistema
 - [ ] Dashboard zones/traffic: si el backend no tiene datos, el chart se muestra vacío sin feedback
+- [ ] El puerto 5062 puede quedar ocupado si el backend no cierra correctamente
 
 ## Ideas Futuras
 
