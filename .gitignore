@@ -1,18 +1,2 @@
-# --- Build ---
 build/
-CMakeFiles/
-cmake-build-*/
-*.o *.obj *.exe *.app
-moc_*.cpp qrc_*.cpp ui_*.h
-
-# --- Qt Creator ---
-CMakeLists.txt.user* *.pro.user* *.autosave *.cbp *.ninja *.dir
-
-# --- IDE ---
-.idea/ .vscode/ *.swp *.swo *~ .DS_Store
-
-# --- Compiled ---
-*.so *.dll *.dylib *.a *.lib
-
-# --- Local ---
-*.conf local/ .env
+venv/
