@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT City — Dashboard Energético</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --bg:      #040c18;
+  --bg2:     #081525;
+  --bg3:     #0c1f38;
+  --panel:   #071020;
+  --border:  #122840;
+  --border2: #1e4a80;
+  --accent:  #00d4ff;
+  --accent2: #0066cc;
+  --green:   #00ff88;
+  --amber:   #ffaa00;
+  --red:     #ff3344;
+  --purple:  #aa44ff;
+  --text:    #c8d8f0;
+  --text2:   #607090;
+  --font:    'JetBrains Mono', monospace;
+  --title:   'Orbitron', sans-serif;
+  --radius:  6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR ── */
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 24px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: var(--title);
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 3px;
+  white-space: nowrap;
+}
+
+.logo small { color: var(--text2); font-size: 9px; display: block; letter-spacing: 2px; }
+
+.nav-tabs { display: flex; gap: 4px; flex: 1; }
+
+.nav-tab {
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 6px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+
+.nav-tab:hover { border-color: var(--border2); color: var(--text); }
+.nav-tab.active { background: var(--accent2); color: white; border-color: var(--accent2); }
+
+.ws-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text2);
+}
+
+.ws-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--text2);
+}
+.ws-dot.ok { background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.back-btn {
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.back-btn:hover { background: var(--bg3); }
+
+/* ── PAGES ── */
+.page { display: none; padding: 20px 24px; }
+.page.active { display: block; }
+
+/* ── GRID LAYOUT ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.col-2   { grid-column: span 2; }
+.col-3   { grid-column: span 3; }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.panel-title {
+  font-family: var(--title);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+
+.panel-badge {
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--accent);
+}
+
+/* ── KPI CARDS ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+
+.kpi-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.kpi-card.blue::before   { background: var(--accent); }
+.kpi-card.green::before  { background: var(--green); }
+.kpi-card.amber::before  { background: var(--amber); }
+.kpi-card.purple::before { background: var(--purple); }
+.kpi-card.red::before    { background: var(--red); }
+
+.kpi-label { font-size: 9px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.kpi-value { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.kpi-sub   { font-size: 10px; color: var(--text2); }
+
+.kpi-card.blue   .kpi-value { color: var(--accent); }
+.kpi-card.green  .kpi-value { color: var(--green); }
+.kpi-card.amber  .kpi-value { color: var(--amber); }
+.kpi-card.purple .kpi-value { color: var(--purple); }
+.kpi-card.red    .kpi-value { color: var(--red); }
+
+.kpi-trend {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px;
+  opacity: 0.15;
+}
+
+/* ── CHARTS ── */
+.chart-wrap {
+  position: relative;
+  height: 220px;
+}
+
+.chart-wrap.tall { height: 280px; }
+.chart-wrap.short { height: 150px; }
+
+/* ── ZONE CARDS ── */
+.zone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+.zone-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.zone-name {
+  font-family: var(--title);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.zone-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.zone-stat .label { color: var(--text2); }
+.zone-stat .value { font-weight: 500; }
+
+.zone-bar {
+  height: 3px;
+  background: var(--bg);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.zone-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s;
+}
+
+/* ── NODE TABLE ── */
+.node-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.node-table th {
+  text-align: left;
+  padding: 6px 10px;
+  color: var(--text2);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+
+.node-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(18,40,64,0.5);
+  vertical-align: middle;
+}
+
+.node-table tr:hover td { background: var(--bg3); cursor: pointer; }
+
+.node-status {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.power-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.power-track {
+  flex: 1;
+  height: 4px;
+  background: var(--bg3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.power-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+/* ── HEATMAP ── */
+#heatmap-canvas {
+  width: 100%;
+  height: 360px;
+  border-radius: var(--radius);
+  background: var(--bg3);
+  display: block;
+}
+
+/* ── RECOMMENDATIONS ── */
+.rec-list { display: flex; flex-direction: column; gap: 8px; }
+
+.rec-item {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.rec-item.high   { border-left: 3px solid var(--red); }
+.rec-item.medium { border-left: 3px solid var(--amber); }
+.rec-item.low    { border-left: 3px solid var(--green); }
+
+.rec-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+.rec-body { flex: 1; }
+.rec-node { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.rec-issues { font-size: 10px; color: var(--text2); }
+
+.rec-saving {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.btn-apply {
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 5px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--green);
+  background: transparent;
+  color: var(--green);
+  cursor: pointer;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.btn-apply:hover { background: rgba(0,255,136,0.1); }
+
+.btn-primary {
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent2);
+  background: var(--accent2);
+  color: white;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+
+.btn-primary:hover { background: #0055aa; }
+
+/* ── FIRMWARE PANEL ── */
+.firmware-panel {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.fw-bytes {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.fw-byte {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* ── TRAFFIC CHART ── */
+.traffic-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.traffic-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+}
+
+.traffic-label {
+  width: 80px;
+  color: var(--text2);
+  text-align: right;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.traffic-track {
+  flex: 1;
+  height: 12px;
+  background: var(--bg3);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.traffic-fill-tx {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.5s;
+}
+
+.traffic-val {
+  width: 50px;
+  text-align: right;
+  color: var(--text2);
+}
+
+/* ── AGG TABLE ── */
+.agg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.agg-table th {
+  padding: 5px 8px;
+  color: var(--text2);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: right;
+  font-weight: 400;
+}
+
+.agg-table th:first-child { text-align: left; }
+
+.agg-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(18,40,64,0.4);
+  text-align: right;
+}
+
+.agg-table td:first-child { text-align: left; }
+.agg-table tr.highlight td { color: var(--green); font-weight: 700; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: var(--text2);
+  font-size: 11px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── NOTIFICATION ── */
+#notif {
+  position: fixed; top: 60px; right: 20px;
+  z-index: 2000; display: flex; flex-direction: column; gap: 6px;
+  pointer-events: none;
+}
+
+.notif-item {
+  background: var(--panel);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 11px;
+  animation: slideIn .2s ease, fadeOut .3s 2.7s forwards;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+}
+
+.notif-item.ok  { border-color: var(--green); }
+.notif-item.err { border-color: var(--red); }
+
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+@keyframes fadeOut { from{opacity:1} to{opacity:0} }
+
+/* ── NODE DETAIL MODAL ── */
+#node-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,20,.85);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#node-modal-overlay.open { display: flex; }
+
+#node-modal {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 24px;
+  width: 640px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-family: var(--title);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.close-btn {
+  background: none; border: none;
+  color: var(--text2); font-size: 18px;
+  cursor: pointer; padding: 0 4px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat-box {
+  background: var(--bg3);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+.stat-label { font-size: 9px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.stat-val   { font-size: 16px; font-weight: 700; color: var(--text); }
+.stat-unit  { font-size: 10px; color: var(--text2); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo">
+    IoT City
+    <small>ENERGY DASHBOARD</small>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('overview')">Overview</button>
+    <button class="nav-tab" onclick="showPage('zones')">Zonas</button>
+    <button class="nav-tab" onclick="showPage('traffic')">Tráfico</button>
+    <button class="nav-tab" onclick="showPage('heatmap')">Heatmap</button>
+    <button class="nav-tab" onclick="showPage('optimization')">Optimización</button>
+    <button class="nav-tab" onclick="showPage('nodes')">Nodos</button>
+  </div>
+
+  <div class="ws-pill">
+    <div class="ws-dot" id="ws-dot"></div>
+    <span id="ws-label">Conectando…</span>
+  </div>
+
+  <a href="/" class="back-btn">← Mapa</a>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PAGE: OVERVIEW -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="page active" id="page-overview">
+
+  <!-- KPI row -->
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="kpi-label">Potencia Total</div>
+      <div class="kpi-value" id="kpi-power">—</div>
+      <div class="kpi-sub" id="kpi-power-sub">mW</div>
+      <div class="kpi-trend">⚡</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Nodos Activos</div>
+      <div class="kpi-value" id="kpi-active">—</div>
+      <div class="kpi-sub" id="kpi-active-sub">de <span id="kpi-total">—</span> total</div>
+      <div class="kpi-trend">◈</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Energía Acum.</div>
+      <div class="kpi-value" id="kpi-energy">—</div>
+      <div class="kpi-sub">mWh total</div>
+      <div class="kpi-trend">🔋</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">Eficiencia Red</div>
+      <div class="kpi-value" id="kpi-efficiency">—</div>
+      <div class="kpi-sub">score / 100</div>
+      <div class="kpi-trend">✦</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Potencia total time-series -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Potencia Total — Serie Temporal</span>
+        <span class="panel-badge" id="ts-samples">— muestras</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart-power-ts"></canvas>
+      </div>
+    </div>
+
+    <!-- Breakdown por zona -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Consumo por Zona</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart-zones-bar"></canvas>
+      </div>
+    </div>
+
+    <!-- Top consumidores -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Top Consumidores</span>
+      </div>
+      <div id="top-consumers"></div>
+    </div>
+
+    <!-- Estado de red -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Estado de Red MRF24J40</span>
+      </div>
+      <div class="chart-wrap short">
+        <canvas id="chart-network-status"></canvas>
+      </div>
+      <div id="network-extra" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PAGE: ZONES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="page" id="page-zones">
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-header">
+      <span class="panel-title">Métricas por Zona Geográfica</span>
+      <span class="panel-badge" id="zone-ts">—</span>
+    </div>
+    <div class="zone-grid" id="zone-cards"></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Potencia por Zona (mW)</span></div>
+      <div class="chart-wrap"><canvas id="chart-zone-power"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Tráfico por Zona (paquetes/s)</span></div>
+      <div class="chart-wrap"><canvas id="chart-zone-traffic"></canvas></div>
+    </div>
+    <div class="panel col-2">
+      <div class="panel-header"><span class="panel-title">Eficiencia por Zona</span></div>
+      <div class="chart-wrap short"><canvas id="chart-zone-efficiency"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PAGE: TRAFFIC -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="page" id="page-traffic">
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Tráfico TX por Nodo</span>
+        <span class="panel-badge">paquetes/s</span>
+      </div>
+      <div class="traffic-bars" id="traffic-bars"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Distribución de Tráfico</span></div>
+      <div class="chart-wrap"><canvas id="chart-traffic-donut"></canvas></div>
+    </div>
+
+    <div class="panel col-2">
+      <div class="panel-header">
+        <span class="panel-title">Análisis de Agregación de Paquetes</span>
+        <span class="panel-badge" style="color:var(--green)">IEEE 802.15.4</span>
+      </div>
+      <table class="agg-table" id="agg-table">
+        <thead>
+          <tr>
+            <th>Tamaño Agg.</th>
+            <th>Eficiencia Single</th>
+            <th>Eficiencia Agg.</th>
+            <th>Mejora</th>
+            <th>T. Ahorrado/muestra</th>
+            <th>Energía Ahorrada</th>
+          </tr>
+        </thead>
+        <tbody id="agg-tbody"></tbody>
+      </table>
+      <p style="font-size:9px;color:var(--text2);margin-top:8px" id="agg-rec"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PAGE: HEATMAP -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="page" id="page-heatmap">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Heatmap de Consumo Energético — Vista Ciudad</span>
+      <div style="display:flex;gap:12px;font-size:10px;color:var(--text2);align-items:center">
+        <span style="display:flex;align-items:center;gap:4px">
+          <span style="width:10px;height:10px;border-radius:50%;background:rgba(0,100,255,0.6);display:inline-block"></span> Bajo
+        </span>
+        <span style="display:flex;align-items:center;gap:4px">
+          <span style="width:10px;height:10px;border-radius:50%;background:rgba(255,170,0,0.6);display:inline-block"></span> Medio
+        </span>
+        <span style="display:flex;align-items:center;gap:4px">
+          <span style="width:10px;height:10px;border-radius:50%;background:rgba(255,50,50,0.7);display:inline-block"></span> Alto
+        </span>
+      </div>
+    </div>
+    <canvas id="heatmap-canvas"></canvas>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PAGE: OPTIMIZATION -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="page" id="page-optimization">
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Recomendaciones de Optimización</span>
+        <button class="btn-primary" onclick="applyAll()">⚡ Aplicar Todas</button>
+      </div>
+      <div class="rec-list" id="rec-list">
+        <div class="empty">⟳ Cargando recomendaciones…</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Historial de Optimización</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-opt-history"></canvas></div>
+      <div id="opt-stats" style="margin-top:10px;font-size:11px;color:var(--text2)"></div>
+    </div>
+
+    <div class="panel col-2">
+      <div class="panel-header">
+        <span class="panel-title">Estrategias Implementadas</span>
+      </div>
+      <div class="grid-4" id="strategy-cards"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PAGE: NODES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="page" id="page-nodes">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Tabla de Nodos — Métricas Energéticas</span>
+      <div style="display:flex;gap:8px">
+        <input id="node-search" placeholder="Buscar ID..."
+          style="background:var(--bg3);border:1px solid var(--border);color:var(--text);
+                 font-family:var(--font);font-size:11px;padding:5px 10px;border-radius:var(--radius);outline:none"
+          oninput="filterNodes(this.value)">
+        <select id="zone-filter" onchange="filterNodes(document.getElementById('node-search').value)"
+          style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+                 font-family:var(--font);font-size:11px;padding:5px 10px;border-radius:var(--radius);outline:none">
+          <option value="">Todas las zonas</option>
+          <option value="zona-norte">Zona Norte</option>
+          <option value="zona-centro">Zona Centro</option>
+          <option value="zona-sur">Zona Sur</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="node-table" id="node-table">
+        <thead>
+          <tr>
+            <th>Nodo</th>
+            <th>Zona</th>
+            <th>Tipo</th>
+            <th>Potencia (mW)</th>
+            <th>Barra</th>
+            <th>TX Power</th>
+            <th>Duty Cycle</th>
+            <th>Intervalo (s)</th>
+            <th>Pkt TX</th>
+            <th>Eficiencia</th>
+          </tr>
+        </thead>
+        <tbody id="node-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- NODE DETAIL MODAL -->
+<div id="node-modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div id="node-modal">
+    <div class="modal-title">
+      <span id="modal-title-text">Detalle de Nodo</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div id="notif"></div>
+
+<script>
+// ────────────────────────────────────────────────────────────
+// CONFIGURACIÓN
+// ────────────────────────────────────────────────────────────
+
+const API = `http://${location.hostname}:5062/api/dashboard`;
+const WS_URL = `ws://${location.hostname}:5062/api/dashboard/ws`;
+
+let ws = null;
+let state = {
+  summary: null,
+  zones: {},
+  timeseries: [],
+  traffic: {},
+  heatmap: [],
+  recommendations: [],
+  aggAnalysis: null,
+  optHistory: [],
+  allNodes: {},  // node_id → detail
+};
+
+let charts = {};
+let nodeRows = {};
+
+// ────────────────────────────────────────────────────────────
+// NAVIGATION
+// ────────────────────────────────────────────────────────────
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+
+  // Cargar datos específicos de la página
+  if (name === 'zones') loadZones();
+  if (name === 'traffic') loadTraffic();
+  if (name === 'heatmap') loadHeatmap();
+  if (name === 'optimization') loadOptimization();
+  if (name === 'nodes') loadNodes();
+}
+
+// ────────────────────────────────────────────────────────────
+// API HELPERS
+// ────────────────────────────────────────────────────────────
+
+async function apiFetch(path) {
+  try {
+    const r = await fetch(API + path);
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch (e) {
+    console.error('API error:', path, e);
+    return null;
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// CHARTS INIT
+// ────────────────────────────────────────────────────────────
+
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: { duration: 300 },
+  plugins: { legend: { labels: { color: '#607090', font: { family: "'JetBrains Mono'" } } } },
+};
+
+function makeLineChart(id, label, color = '#00d4ff') {
+  const ctx = document.getElementById(id).getContext('2d');
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label,
+        data: [],
+        borderColor: color,
+        backgroundColor: color.replace(')', ', 0.08)').replace('rgb', 'rgba'),
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.3,
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        x: { ticks: { color: '#607090', font: { size: 9 }, maxTicksLimit: 8 },
+             grid: { color: 'rgba(18,40,64,0.5)' } },
+        y: { ticks: { color: '#607090', font: { size: 9 } },
+             grid: { color: 'rgba(18,40,64,0.5)' } }
+      }
+    }
+  });
+}
+
+function makeBarChart(id, labels, datasets) {
+  const ctx = document.getElementById(id).getContext('2d');
+  return new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        x: { ticks: { color: '#607090', font: { size: 9 } }, grid: { color: 'rgba(18,40,64,0.5)' } },
+        y: { ticks: { color: '#607090', font: { size: 9 } }, grid: { color: 'rgba(18,40,64,0.5)' } }
+      }
+    }
+  });
+}
+
+function initCharts() {
+  charts.powerTs = makeLineChart('chart-power-ts', 'Potencia total (mW)', '#00d4ff');
+  charts.zonesBar = makeBarChart('chart-zones-bar',
+    ['Norte', 'Centro', 'Sur'],
+    [{
+      label: 'Consumo (mW)',
+      data: [0, 0, 0],
+      backgroundColor: ['rgba(0,212,255,0.6)', 'rgba(0,255,136,0.6)', 'rgba(255,170,0,0.6)'],
+      borderRadius: 4,
+    }]
+  );
+  charts.networkStatus = new Chart(
+    document.getElementById('chart-network-status').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Activos', 'Inactivos', 'Sin tensión'],
+        datasets: [{ data: [0,0,0],
+          backgroundColor: ['#00ff88', '#ffaa00', '#556688'],
+          borderWidth: 0 }]
+      },
+      options: { ...CHART_DEFAULTS, cutout: '65%',
+        plugins: { legend: { position: 'right',
+          labels: { color: '#607090', boxWidth: 10, font: { size: 9 } } } } }
+    }
+  );
+}
+
+// ────────────────────────────────────────────────────────────
+// OVERVIEW UPDATE
+// ────────────────────────────────────────────────────────────
+
+function updateOverview() {
+  const s = state.summary;
+  if (!s) return;
+
+  document.getElementById('kpi-power').textContent =
+    s.total_power_mW < 1000
+      ? s.total_power_mW.toFixed(0) + ' mW'
+      : (s.total_power_mW / 1000).toFixed(2) + ' W';
+  document.getElementById('kpi-active').textContent = s.active_nodes || 0;
+  document.getElementById('kpi-total').textContent = s.total_nodes || 0;
+  document.getElementById('kpi-energy').textContent = (s.total_energy_mWh || 0).toFixed(1);
+  document.getElementById('kpi-efficiency').textContent = (s.avg_efficiency_score || 0).toFixed(0);
+
+  // Top consumers
+  const tc = s.top_consumers || [];
+  const maxPow = tc.length ? tc[0][1] : 1;
+  document.getElementById('top-consumers').innerHTML = tc.map(([id, pow]) => `
+    <div class="power-bar" style="margin-bottom:8px">
+      <span style="width:80px;font-size:10px;color:var(--text2);text-align:right;flex-shrink:0">${id}</span>
+      <div class="power-track" style="margin:0 8px">
+        <div class="power-fill" style="width:${Math.round(pow/maxPow*100)}%;background:var(--accent)"></div>
+      </div>
+      <span style="font-size:10px;width:60px;text-align:right">${pow.toFixed(1)} mW</span>
+    </div>
+  `).join('') || '<div class="empty">Sin datos</div>';
+
+  // Power time-series
+  const ts = state.timeseries;
+  if (ts.length && charts.powerTs) {
+    const labels = ts.map(s => {
+      const d = new Date(s.ts * 1000);
+      return d.getHours().toString().padStart(2,'0') + ':' +
+             d.getMinutes().toString().padStart(2,'0') + ':' +
+             d.getSeconds().toString().padStart(2,'0');
+    });
+    charts.powerTs.data.labels = labels;
+    charts.powerTs.data.datasets[0].data = ts.map(s => s.total_power_mW);
+    charts.powerTs.update('none');
+    document.getElementById('ts-samples').textContent = ts.length + ' muestras';
+  }
+
+  // Network status donut
+  if (charts.networkStatus) {
+    charts.networkStatus.data.datasets[0].data = [
+      s.active_nodes || 0,
+      Math.max(0, (s.total_nodes || 0) - (s.active_nodes || 0) - (s.unpowered || 0)),
+      s.unpowered || 0,
+    ];
+    charts.networkStatus.update('none');
+  }
+
+  // Network extra info
+  document.getElementById('network-extra').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+      <div style="color:var(--text2)">Estimado diario:</div>
+      <div style="text-align:right;color:var(--amber)">${(s.estimated_daily_Wh||0).toFixed(2)} Wh</div>
+      <div style="color:var(--text2)">Uptime:</div>
+      <div style="text-align:right">${fmtUptime(s.uptime_s)}</div>
+      <div style="color:var(--text2)">Zonas activas:</div>
+      <div style="text-align:right;color:var(--green)">${(s.zones||[]).length}</div>
+    </div>
+  `;
+}
+
+function fmtUptime(s) {
+  if (!s) return '—';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = Math.floor(s % 60);
+  return `${h}h ${m}m ${sec}s`;
+}
+
+// ────────────────────────────────────────────────────────────
+// ZONES
+// ────────────────────────────────────────────────────────────
+
+async function loadZones() {
+  const data = await apiFetch('/zones');
+  if (!data) return;
+  state.zones = data.zones;
+
+  const zones = Object.values(state.zones);
+  const maxPow = Math.max(...zones.map(z => z.total_power_mW), 1);
+
+  document.getElementById('zone-ts').textContent =
+    new Date().toLocaleTimeString('es-AR', { hour12: false });
+
+  document.getElementById('zone-cards').innerHTML = zones.map(z => `
+    <div class="zone-card">
+      <div class="zone-name">${z.zone}</div>
+      <div class="zone-stat"><span class="label">Nodos</span>
+        <span class="value">${z.node_count}</span></div>
+      <div class="zone-stat"><span class="label">Potencia</span>
+        <span class="value" style="color:var(--accent)">${z.total_power_mW.toFixed(1)} mW</span></div>
+      <div class="zone-stat"><span class="label">Energía acum.</span>
+        <span class="value">${z.total_energy_mWh.toFixed(2)} mWh</span></div>
+      <div class="zone-stat"><span class="label">Pkt TX</span>
+        <span class="value">${z.total_packets_tx.toLocaleString()}</span></div>
+      <div class="zone-stat"><span class="label">Eficiencia</span>
+        <span class="value" style="color:${z.avg_efficiency_score > 70 ? 'var(--green)' : 'var(--amber)'}">
+          ${z.avg_efficiency_score}/100</span></div>
+      <div class="zone-bar">
+        <div class="zone-bar-fill"
+          style="width:${Math.round(z.total_power_mW/maxPow*100)}%;background:var(--accent)">
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Zone power bar chart
+  const labels = zones.map(z => z.zone.replace('zona-', '').toUpperCase());
+  if (!charts.zonePower) {
+    charts.zonePower = makeBarChart('chart-zone-power', labels, [{
+      label: 'Potencia (mW)',
+      data: zones.map(z => z.total_power_mW),
+      backgroundColor: ['rgba(0,212,255,0.7)', 'rgba(0,255,136,0.7)', 'rgba(255,170,0,0.7)'],
+      borderRadius: 4,
+    }]);
+  } else {
+    charts.zonePower.data.datasets[0].data = zones.map(z => z.total_power_mW);
+    charts.zonePower.update();
+  }
+
+  if (!charts.zoneTraffic) {
+    charts.zoneTraffic = makeBarChart('chart-zone-traffic', labels, [{
+      label: 'TX rate (pkt/s)',
+      data: zones.map(z => (z.total_packets_tx / Math.max(z.node_count, 1)).toFixed(2)),
+      backgroundColor: ['rgba(170,68,255,0.7)', 'rgba(170,68,255,0.5)', 'rgba(170,68,255,0.3)'],
+      borderRadius: 4,
+    }]);
+  } else {
+    charts.zoneTraffic.data.datasets[0].data =
+      zones.map(z => (z.total_packets_tx / Math.max(z.node_count, 1)).toFixed(2));
+    charts.zoneTraffic.update();
+  }
+
+  if (!charts.zoneEff) {
+    charts.zoneEff = new Chart(
+      document.getElementById('chart-zone-efficiency').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Eficiencia (%)',
+            data: zones.map(z => z.avg_efficiency_score),
+            backgroundColor: zones.map(z =>
+              z.avg_efficiency_score > 70
+                ? 'rgba(0,255,136,0.7)'
+                : 'rgba(255,170,0,0.7)'
+            ),
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          ...CHART_DEFAULTS,
+          scales: {
+            x: { ticks: { color: '#607090', font: { size: 9 } } },
+            y: { min: 0, max: 100, ticks: { color: '#607090', font: { size: 9 } } }
+          }
+        }
+      }
+    );
+  } else {
+    charts.zoneEff.data.datasets[0].data = zones.map(z => z.avg_efficiency_score);
+    charts.zoneEff.update();
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// TRAFFIC
+// ────────────────────────────────────────────────────────────
+
+async function loadTraffic() {
+  const [tData, aggData] = await Promise.all([
+    apiFetch('/traffic'),
+    apiFetch('/optimization/aggregation-analysis'),
+  ]);
+
+  if (tData) {
+    state.traffic = tData.traffic;
+    const nodes = Object.values(state.traffic).sort((a, b) => b.tx_rate_pps - a.tx_rate_pps);
+    const maxRate = Math.max(...nodes.map(n => n.tx_rate_pps), 0.01);
+
+    document.getElementById('traffic-bars').innerHTML = nodes.map(n => `
+      <div class="traffic-bar-row">
+        <div class="traffic-label" title="${n.node_id}">${n.node_id}</div>
+        <div class="traffic-track">
+          <div class="traffic-fill-tx" style="width:${Math.round(n.tx_rate_pps/maxRate*100)}%"></div>
+        </div>
+        <div class="traffic-val">${n.tx_rate_pps.toFixed(2)} p/s</div>
+      </div>
+    `).join('');
+
+    // Donut de tráfico por zona
+    const zoneTraffic = {};
+    Object.values(state.traffic).forEach(n => {
+      zoneTraffic[n.zone] = (zoneTraffic[n.zone] || 0) + n.total_tx;
+    });
+
+    if (!charts.trafficDonut) {
+      charts.trafficDonut = new Chart(
+        document.getElementById('chart-traffic-donut').getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(zoneTraffic),
+            datasets: [{
+              data: Object.values(zoneTraffic),
+              backgroundColor: ['rgba(0,212,255,0.8)', 'rgba(0,255,136,0.8)', 'rgba(255,170,0,0.8)'],
+              borderWidth: 0,
+            }]
+          },
+          options: {
+            ...CHART_DEFAULTS, cutout: '60%',
+            plugins: { legend: { position: 'right',
+              labels: { color: '#607090', boxWidth: 10, font: { size: 9 } } } }
+          }
+        }
+      );
+    } else {
+      charts.trafficDonut.data.labels = Object.keys(zoneTraffic);
+      charts.trafficDonut.data.datasets[0].data = Object.values(zoneTraffic);
+      charts.trafficDonut.update();
+    }
+  }
+
+  if (aggData) {
+    state.aggAnalysis = aggData;
+    const rows = aggData.agg_comparison || [];
+    document.getElementById('agg-tbody').innerHTML = rows.map(r => `
+      <tr class="${r.agg_size === 3 || r.agg_size === 4 ? 'highlight' : ''}">
+        <td>${r.agg_size === 1 ? '1 (sin agg.)' : r.agg_size + ' paquetes'}</td>
+        <td>${r.efficiency_single}%</td>
+        <td>${r.efficiency_agg}%</td>
+        <td>${r.agg_size === 1 ? '—' : '+' + r.improvement_pct + '%'}</td>
+        <td>${r.t_saved_per_sample_ms.toFixed(2)} ms</td>
+        <td>${r.energy_saved_mJ_per_sample.toFixed(4)} mJ</td>
+      </tr>
+    `).join('');
+    document.getElementById('agg-rec').textContent =
+      '★ ' + (aggData.recommendation || '');
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// HEATMAP
+// ────────────────────────────────────────────────────────────
+
+async function loadHeatmap() {
+  const data = await apiFetch('/heatmap');
+  if (!data) return;
+  state.heatmap = data.heatmap;
+  drawHeatmap();
+}
+
+function drawHeatmap() {
+  const canvas = document.getElementById('heatmap-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth;
+  const H = canvas.offsetHeight || 360;
+  canvas.width = W;
+  canvas.height = H;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Fondo tipo ciudad
+  ctx.fillStyle = '#081525';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid calles
+  ctx.strokeStyle = 'rgba(26,58,107,0.5)';
+  ctx.lineWidth = 1;
+  [0.2, 0.4, 0.6, 0.8].forEach(f => {
+    ctx.beginPath(); ctx.moveTo(W * f, 0); ctx.lineTo(W * f, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, H * f); ctx.lineTo(W, H * f); ctx.stroke();
+  });
+
+  if (!state.heatmap.length) return;
+
+  const maxX = Math.max(...state.heatmap.map(n => n.x), 1);
+  const maxY = Math.max(...state.heatmap.map(n => n.y), 1);
+  const maxPow = Math.max(...state.heatmap.map(n => n.power_mW), 1);
+
+  state.heatmap.forEach(node => {
+    const sx = (node.x / maxX) * (W * 0.85) + W * 0.07;
+    const sy = (node.y / maxY) * (H * 0.85) + H * 0.07;
+    const intensity = node.power_mW / maxPow;
+    const r = 30 + intensity * 50;
+
+    // Glow radial
+    const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
+    if (intensity > 0.7) {
+      grad.addColorStop(0, `rgba(255,50,50,${intensity * 0.7})`);
+      grad.addColorStop(0.5, `rgba(255,100,0,${intensity * 0.3})`);
+    } else if (intensity > 0.4) {
+      grad.addColorStop(0, `rgba(255,170,0,${intensity * 0.7})`);
+      grad.addColorStop(0.5, `rgba(255,170,0,${intensity * 0.2})`);
+    } else {
+      grad.addColorStop(0, `rgba(0,100,255,${0.3 + intensity * 0.4})`);
+      grad.addColorStop(0.5, `rgba(0,100,255,${0.1})`);
+    }
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Punto central
+    ctx.save();
+    ctx.shadowColor = intensity > 0.7 ? '#ff3344' : intensity > 0.4 ? '#ffaa00' : '#00d4ff';
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = ctx.shadowColor;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Label
+    ctx.font = '9px JetBrains Mono';
+    ctx.fillStyle = 'rgba(200,216,240,0.7)';
+    ctx.textAlign = 'center';
+    ctx.fillText(node.node_id, sx, sy + 14);
+  });
+}
+
+// ────────────────────────────────────────────────────────────
+// OPTIMIZATION
+// ────────────────────────────────────────────────────────────
+
+async function loadOptimization() {
+  const [recData, histData] = await Promise.all([
+    apiFetch('/optimization/recommendations'),
+    apiFetch('/optimization/history'),
+  ]);
+
+  if (recData) {
+    state.recommendations = recData.recommendations;
+    renderRecommendations();
+  }
+
+  if (histData) {
+    state.optHistory = histData.history;
+    renderOptHistory();
+  }
+
+  renderStrategies();
+}
+
+function renderRecommendations() {
+  const recs = state.recommendations;
+  if (!recs.length) {
+    document.getElementById('rec-list').innerHTML =
+      '<div class="empty">✓ Sin recomendaciones — sistema optimizado</div>';
+    return;
+  }
+
+  document.getElementById('rec-list').innerHTML = recs.map(rec => {
+    const severity = rec.issues[0]?.severity || 'low';
+    const icons = { high: '🔴', medium: '🟡', low: '🟢' };
+    return `
+      <div class="rec-item ${severity}">
+        <div class="rec-icon">${icons[severity]}</div>
+        <div class="rec-body">
+          <div class="rec-node">${rec.node_id}
+            <span style="color:var(--text2);font-size:9px;margin-left:8px">${rec.zone}</span>
+          </div>
+          <div class="rec-issues">${rec.issues.map(i => i.msg).join(' · ')}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <div class="rec-saving">↓${rec.max_saving_pct}%</div>
+          <button class="btn-apply" onclick="applyBest('${rec.node_id}','${rec.issues[0].action}')">
+            Aplicar
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function applyBest(nodeId, action) {
+  const data = await fetch(`${API}/optimization/apply/${nodeId}/${action}`, { method: 'POST' })
+    .then(r => r.json()).catch(() => null);
+  if (data) {
+    notify(`${nodeId}: ahorró ${data.saving_pct}% (${data.saving_mW.toFixed(1)} mW)`, 'ok');
+    await loadOptimization();
+  }
+}
+
+async function applyAll() {
+  const data = await fetch(`${API}/optimization/apply_all`, { method: 'POST' })
+    .then(r => r.json()).catch(() => null);
+  if (data) {
+    notify(`Aplicadas ${data.applied} optimizaciones → -${data.total_saving_W.toFixed(3)} W`, 'ok');
+    await loadOptimization();
+  }
+}
+
+function renderOptHistory() {
+  const hist = state.optHistory.slice(-30);
+  if (!hist.length) return;
+
+  const labels = hist.map((_, i) => 'T-' + (hist.length - i));
+  const savings = hist.map(h => h.total_saving_mW);
+  const nodes = hist.map(h => h.nodes_optimized);
+
+  if (!charts.optHistory) {
+    charts.optHistory = new Chart(
+      document.getElementById('chart-opt-history').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Ahorro (mW)',
+              data: savings,
+              backgroundColor: 'rgba(0,255,136,0.6)',
+              borderRadius: 3,
+              yAxisID: 'y',
+            },
+            {
+              label: 'Nodos optimizados',
+              data: nodes,
+              type: 'line',
+              borderColor: '#00d4ff',
+              borderWidth: 1.5,
+              pointRadius: 2,
+              fill: false,
+              yAxisID: 'y1',
+            }
+          ]
+        },
+        options: {
+          ...CHART_DEFAULTS,
+          scales: {
+            x: { ticks: { color: '#607090', font: { size: 9 } } },
+            y: { ticks: { color: '#607090', font: { size: 9 } }, position: 'left' },
+            y1: { ticks: { color: '#00d4ff', font: { size: 9 } }, position: 'right',
+                  grid: { drawOnChartArea: false } }
+          }
+        }
+      }
+    );
+  } else {
+    charts.optHistory.data.labels = labels;
+    charts.optHistory.data.datasets[0].data = savings;
+    charts.optHistory.data.datasets[1].data = nodes;
+    charts.optHistory.update();
+  }
+
+  const totalSaving = savings.reduce((a, b) => a + b, 0);
+  document.getElementById('opt-stats').innerHTML = `
+    Ahorro total registrado: <strong style="color:var(--green)">${totalSaving.toFixed(1)} mW</strong> |
+    Ciclos: <strong>${hist.length}</strong>
+  `;
+}
+
+function renderStrategies() {
+  const strategies = [
+    { name: 'Duty Cycling\nAdaptativo', icon: '🔄', desc: 'Ajusta ciclo activo/sleep según carga de tráfico y vecinos', color: 'var(--accent)' },
+    { name: 'TX Power\nControl', icon: '📡', desc: 'Reduce potencia TX si RSSI/LQI indican enlace con margen', color: 'var(--green)' },
+    { name: 'Agregación\nde Paquetes', icon: '📦', desc: 'Combina múltiples muestras en un solo frame 802.15.4', color: 'var(--amber)' },
+    { name: 'Intervalo\nAdaptativo', icon: '⏱', desc: 'Aumenta intervalo si datos son estables (ΔRSSI < 5%)', color: 'var(--purple)' },
+  ];
+  document.getElementById('strategy-cards').innerHTML = strategies.map(s => `
+    <div class="panel" style="border-color:${s.color}22">
+      <div style="font-size:24px;margin-bottom:8px">${s.icon}</div>
+      <div style="font-size:10px;font-weight:700;color:${s.color};margin-bottom:6px;white-space:pre-line">${s.name}</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.5">${s.desc}</div>
+    </div>
+  `).join('');
+}
+
+// ────────────────────────────────────────────────────────────
+// NODES TABLE
+// ────────────────────────────────────────────────────────────
+
+async function loadNodes() {
+  const tData = await apiFetch('/traffic');
+  if (!tData) return;
+
+  const traffic = tData.traffic;
+  const zones = state.zones;
+  const powers = {};
+
+  // Obtener potencias del summary
+  if (state.summary && state.summary.top_consumers) {
+    state.summary.top_consumers.forEach(([id, pow]) => { powers[id] = pow; });
+  }
+
+  const nodes = Object.values(traffic);
+  const maxPow = Math.max(...nodes.map(n => powers[n.node_id] || 0), 1);
+
+  nodeRows = {};
+  nodes.forEach(n => { nodeRows[n.node_id] = n; });
+
+  renderNodeTable(nodes, maxPow);
+}
+
+function renderNodeTable(nodes, maxPow) {
+  const txLevels = ['0 dBm', '-10 dBm', '-20 dBm'];
+  document.getElementById('node-tbody').innerHTML = nodes.map(n => {
+    const pow = 0;  // se actualizará vía WS
+    return `
+    <tr onclick="openNodeModal('${n.node_id}')">
+      <td>
+        <span class="node-status" style="background:${n.tx_rate_pps > 0 ? 'var(--green)' : 'var(--gray)'}"></span>
+        ${n.node_id}
+      </td>
+      <td style="color:var(--text2)">${n.zone || '—'}</td>
+      <td style="font-size:9px;color:var(--accent)">${n.node_id.startsWith('RTR') ? 'Router' : 'End Device'}</td>
+      <td><span id="pow-${n.node_id}">—</span></td>
+      <td>
+        <div class="power-track" style="width:80px">
+          <div class="power-fill" id="powbar-${n.node_id}" style="width:0%"></div>
+        </div>
+      </td>
+      <td id="txpow-${n.node_id}" style="font-size:10px">—</td>
+      <td id="duty-${n.node_id}">—</td>
+      <td id="int-${n.node_id}">—</td>
+      <td>${n.total_tx.toLocaleString()}</td>
+      <td><span id="eff-${n.node_id}" style="font-size:10px">—</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--text2)">Sin datos</td></tr>';
+}
+
+function filterNodes(search) {
+  const zoneF = document.getElementById('zone-filter').value;
+  document.querySelectorAll('#node-tbody tr').forEach(row => {
+    const id = row.querySelector('td')?.textContent?.trim() || '';
+    const zone = row.querySelectorAll('td')[1]?.textContent?.trim() || '';
+    const matchSearch = !search || id.toLowerCase().includes(search.toLowerCase());
+    const matchZone = !zoneF || zone.includes(zoneF);
+    row.style.display = matchSearch && matchZone ? '' : 'none';
+  });
+}
+
+// ────────────────────────────────────────────────────────────
+// NODE MODAL
+// ────────────────────────────────────────────────────────────
+
+async function openNodeModal(nodeId) {
+  const detail = await apiFetch(`/node/${nodeId}`);
+  if (!detail) return;
+
+  document.getElementById('modal-title-text').textContent = `Nodo: ${nodeId}`;
+  document.getElementById('node-modal-overlay').classList.add('open');
+
+  const inst = detail.instant || {};
+  const s5 = detail.stats_5min || {};
+  const cfg = detail.config || {};
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">Potencia Inst.</div>
+        <div class="stat-val">${(inst.power_mW||0).toFixed(1)}<span class="stat-unit"> mW</span></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Corriente Radio</div>
+        <div class="stat-val">${(inst.radio_mA||0).toFixed(1)}<span class="stat-unit"> mA</span></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Corriente MCU</div>
+        <div class="stat-val">${(inst.mcu_mA||0).toFixed(1)}<span class="stat-unit"> mA</span></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Fracción TX</div>
+        <div class="stat-val">${((inst.frac_tx||0)*100).toFixed(1)}<span class="stat-unit">%</span></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Fracción Sleep</div>
+        <div class="stat-val" style="color:var(--green)">${((inst.frac_sleep||0)*100).toFixed(1)}<span class="stat-unit">%</span></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Energía Total</div>
+        <div class="stat-val">${(s5.total_energy_mWh||0).toFixed(3)}<span class="stat-unit"> mWh</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <div style="font-size:9px;color:var(--text2);letter-spacing:1px;margin-bottom:8px">CONFIGURACIÓN OPERATIVA</div>
+      <div class="firmware-panel">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;font-size:11px;margin-bottom:12px">
+          <div><span style="color:var(--text2)">TX Power: </span>${['0 dBm','−10 dBm','−20 dBm'][cfg.tx_power_level||0]}</div>
+          <div><span style="color:var(--text2)">Duty Cycle: </span>${((cfg.duty_cycle||0)*100).toFixed(0)}%</div>
+          <div><span style="color:var(--text2)">Intervalo: </span>${(cfg.tx_interval_s||0).toFixed(1)}s</div>
+          <div><span style="color:var(--text2)">Agregación: </span>${cfg.aggregation_size||1} pkts</div>
+        </div>
+        <div style="color:var(--text2);font-size:9px;margin-bottom:6px">BYTES FIRMWARE (3 bytes configuración comprimida):</div>
+        <div class="fw-bytes" id="modal-fw-bytes">—</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn-apply" onclick="applyBest('${nodeId}','tx_power_reduce')">↓ TX Power</button>
+      <button class="btn-apply" onclick="applyBest('${nodeId}','duty_cycle_reduce')">↓ Duty Cycle</button>
+      <button class="btn-apply" onclick="applyBest('${nodeId}','aggregation_enable')">+ Agregación</button>
+      <button class="btn-apply" onclick="applyBest('${nodeId}','full_optimize')" style="color:var(--green)">⚡ Full Optimize</button>
+      <button class="btn-apply" onclick="applyBest('${nodeId}','reset_defaults')" style="color:var(--amber)">⟳ Reset</button>
+    </div>
+  `;
+
+  // Cargar firmware bytes
+  const cfgData = await apiFetch(`/node/${nodeId}/config`);
+  if (cfgData && cfgData.firmware_bytes) {
+    document.getElementById('modal-fw-bytes').innerHTML =
+      cfgData.firmware_bytes.map(b =>
+        `<div class="fw-byte">0x${b.toString(16).padStart(2,'0').toUpperCase()}</div>`
+      ).join('');
+  }
+}
+
+function closeModal() {
+  document.getElementById('node-modal-overlay').classList.remove('open');
+}
+
+// ────────────────────────────────────────────────────────────
+// WEBSOCKET
+// ────────────────────────────────────────────────────────────
+
+function connectWS() {
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    document.getElementById('ws-dot').classList.add('ok');
+    document.getElementById('ws-label').textContent = 'Tiempo Real';
+    notify('Dashboard conectado', 'ok');
+  };
+
+  ws.onclose = () => {
+    document.getElementById('ws-dot').classList.remove('ok');
+    document.getElementById('ws-label').textContent = 'Reconectando…';
+    setTimeout(connectWS, 4000);
+  };
+
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+
+    if (msg.type === 'init' || msg.type === 'dashboard_tick') {
+      if (msg.summary) state.summary = msg.summary;
+      if (msg.zones) state.zones = msg.zones;
+      if (msg.timeseries) state.timeseries = msg.timeseries;
+      if (msg.global) {
+        state.timeseries.push(msg.global);
+        if (state.timeseries.length > 300) state.timeseries.shift();
+      }
+      updateOverview();
+    }
+  };
+}
+
+// ────────────────────────────────────────────────────────────
+// POLLING (fallback cuando WS no entrega todo)
+// ────────────────────────────────────────────────────────────
+
+async function pollData() {
+  const [sumData, tsData] = await Promise.all([
+    apiFetch('/summary'),
+    apiFetch('/timeseries/global?last_n=120'),
+  ]);
+
+  if (sumData) state.summary = sumData;
+  if (tsData) state.timeseries = tsData.timeseries || [];
+
+  updateOverview();
+}
+
+// ────────────────────────────────────────────────────────────
+// NOTIFICATIONS
+// ────────────────────────────────────────────────────────────
+
+function notify(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'notif-item ' + type;
+  el.textContent = msg;
+  document.getElementById('notif').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ────────────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────────────
+
+async function init() {
+  initCharts();
+  connectWS();
+  await pollData();
+
+  // Actualizar overview cada 5s
+  setInterval(pollData, 5000);
+
+  // Actualizar zonas si están visibles
+  setInterval(() => {
+    if (document.getElementById('page-zones').classList.contains('active')) loadZones();
+    if (document.getElementById('page-heatmap').classList.contains('active')) {
+      loadHeatmap().then(drawHeatmap);
+    }
+  }, 8000);
+}
+
+init();
+</script>
+</body>
+</html>
