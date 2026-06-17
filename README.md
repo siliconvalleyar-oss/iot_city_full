@@ -7,7 +7,7 @@ Backend FastAPI + App Flutter + Cliente Qt Desktop.
 /home/optimus/Documentos/src/flutter_src/iot_city/
 ├── iot_city_web/          # Backend Python + Frontend Web
 ├── iot_city_flt/          # App Flutter (móvil)
-├── iot_qt/                # Cliente Qt Desktop (C++17)
+├── iot_city_qt/           # Cliente Qt Desktop (C++17)
 ├── .gitignore
 └── README.md
 ```
