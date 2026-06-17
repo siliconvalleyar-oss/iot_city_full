@@ -9,7 +9,7 @@ WebSocketClient::WebSocketClient(QObject *parent) : QObject(parent) {
     connect(m_socket, &QWebSocket::connected, this, &WebSocketClient::onConnected);
     connect(m_socket, &QWebSocket::disconnected, this, &WebSocketClient::onDisconnected);
     connect(m_socket, &QWebSocket::textMessageReceived, this, &WebSocketClient::onTextMessageReceived);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     connect(m_socket, &QWebSocket::errorOccurred, this, &WebSocketClient::onError);
 #else
     connect(m_socket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &WebSocketClient::onError);

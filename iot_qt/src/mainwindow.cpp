@@ -10,6 +10,9 @@
 #include <QStatusBar>
 #include <QTimer>
 #include <QLabel>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QTabWidget>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     m_api = new ApiClient(this);
@@ -107,7 +110,8 @@ void MainWindow::refreshAll() {
 
 void MainWindow::onDevicesReceived(const QJsonDocument &doc) {
     m_devices.clear();
-    QJsonArray arr = doc.array();
+    QJsonArray arr = doc.object().value("devices").toArray();
+    if (arr.isEmpty()) arr = doc.array();
     for (const auto &v : arr) {
         Device dev = Device::fromJson(v.toObject());
         m_devices[dev.id] = dev;

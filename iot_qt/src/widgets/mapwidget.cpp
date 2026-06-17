@@ -132,16 +132,19 @@ void MapWidget::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void MapWidget::mouseReleaseEvent(QMouseEvent *e) {
-    if (m_draggingDevice) {
+    bool wasDrag = (e->pos() - m_dragStart).manhattanLength() > 5;
+    if (m_draggingDevice && wasDrag) {
         auto &dev = m_devices[m_dragDevId];
         emit deviceMoved(m_dragDevId, qRound(dev.x), qRound(dev.y));
         m_draggingDevice = false; m_dragDevId.clear(); setCursor(Qt::ArrowCursor); return;
     }
-    if (m_dragging) { m_dragging = false; setCursor(Qt::ArrowCursor); return; }
+    m_draggingDevice = false; m_dragDevId.clear();
+    m_dragging = false;
     QPointF w = screenToWorld(e->pos().x(), e->pos().y());
     QString hit = deviceAt(w.x(), w.y());
     m_selectedId = hit;
     emit deviceSelected(hit);
+    setCursor(hit.isEmpty() ? Qt::ArrowCursor : Qt::PointingHandCursor);
     update();
 }
 

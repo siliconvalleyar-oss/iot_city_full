@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+set(RESOURCES resources.qrc)
 
 find_package(Qt6 QUIET COMPONENTS Core Widgets Network WebSockets Charts)
 if(Qt6_FOUND)

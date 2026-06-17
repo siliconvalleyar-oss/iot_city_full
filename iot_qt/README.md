@@ -5,24 +5,56 @@ Cliente de escritorio para el sistema IoT City, construido con C++17 y Qt (5.15+
 ## Requisitos
 
 - Qt 5.15+ o Qt 6.x con módulos: Core, Widgets, Network, WebSockets, Charts
-- CMake 3.16+
+- CMake 3.16+ (o qmake para el `.pro`)
 - Compilador C++17 (GCC 9+, Clang 10+, MSVC 2019+)
 
-## Compilar
+## Compilar (CMake)
 
 ```bash
 mkdir build && cd build
 cmake ..
-cmake --build .
+cmake --build . -j$(nproc)
 ./iot_qt
 ```
 
-## Rama `qt`
+## Compilar (QMake)
 
-Esta rama contiene exclusivamente el proyecto de escritorio Qt.
-El backend FastAPI y la app Flutter están en las ramas `web` y `flt` respectivamente.
+```bash
+mkdir build && cd build
+qmake ../iot_qt.pro
+make -j$(nproc)
+./iot_qt
+```
 
 ## Conexión
 
-Por defecto se conecta a `http://ms7851.local:5062/api`.  
-Se puede configurar host/puerto desde el menú **File > Configure Host** (Ctrl+H) o en tiempo de ejecución.
+Por defecto se conecta a `http://192.168.1.41:5062/api`.  
+Configurable desde **File > Configure Host** (Ctrl+H).
+
+## Estructura
+
+```
+iot_qt/
+├── assets/              # Recursos (icon.png)
+├── src/
+│   ├── main.cpp         # Entry point + splash screen
+│   ├── mainwindow.*     # Ventana principal
+│   ├── models/          # Device, DashboardMetrics
+│   ├── network/         # ApiClient (REST), WebSocketClient
+│   ├── widgets/         # MapWidget, DashboardWidget, DevicePanel, etc.
+│   └── utils/           # Settings (QSettings)
+├── CMakeLists.txt       # Build CMake
+├── iot_qt.pro           # Build QMake
+├── resources.qrc        # Recursos Qt
+└── *.md                 # Documentación
+```
+
+## Documentación
+
+| Archivo | Descripción |
+|---------|-------------|
+| `ARCHITECTURE.md` | Arquitectura del sistema y componentes |
+| `API.md` | Endpoints del backend FastAPI |
+| `DEPLOY.md` | Despliegue en producción |
+| `TODO.md` | Roadmap y tareas pendientes |
+| `CONTRIBUTING.md` | Guía para contribuir |

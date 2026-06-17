@@ -35,7 +35,7 @@ IMPL_GET(getDevices, "/devices")
 IMPL_GET(getMetrics, "/metrics")
 IMPL_GET(getMesh, "/mesh")
 IMPL_GET(getDashboardSummary, "/dashboard/summary")
-IMPL_GET(getDashboardTimeseries, "/dashboard/timeseries/global?last_n=120")
+void ApiClient::getDashboardTimeseries(int n, JsonCb ok, ErrCb err) { doGet(QString("/dashboard/timeseries/global?last_n=%1").arg(n), ok, err); }
 IMPL_GET(getDashboardTraffic, "/dashboard/traffic")
 IMPL_GET(getDashboardZones, "/dashboard/zones")
 IMPL_POST(simulateBlackout, "/simulate/blackout")
