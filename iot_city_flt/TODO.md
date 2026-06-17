@@ -1,11 +1,11 @@
-# 📋 IoT City Flutter — Plan de Trabajo
+# IoT City Flutter — Plan de Trabajo
 
-> **Versión:** 1.0.0  
+> **Versión:** 1.0.0
 > **Última actualización:** Junio 2026
 
 ---
 
-## ✅ Completado (v1.0.0)
+## Completado (v1.0.0)
 
 - [x] Proyecto Flutter creado con configuración base
 - [x] Sistema de 20 paletas de colores (Black Flame default)
@@ -28,11 +28,12 @@
 
 ---
 
-## 🔜 Próximas Tareas
+## Próximas Tareas
 
 ### Prioridad Alta
 
-- [ ] **Conexión WebSocket real** con backend IoT City
+- [ ] **Conexión WebSocket real** con backend IoT City (`192.168.1.41:5062`)
+- [ ] **Conexión API REST** para datos reales de dispositivos y métricas
 - [ ] **Autenticación JWT** para endpoints seguros
 - [ ] **Pantalla de Settings** con configuración de API
 - [ ] **Persistencia de paleta seleccionada** (SharedPreferences)
@@ -57,7 +58,7 @@
 
 ---
 
-## 🚀 Roadmap
+## Roadmap
 
 ### v1.1.0 — Backend Integration
 - [ ] WebSocket para datos en tiempo real
@@ -85,7 +86,7 @@
 
 ---
 
-## 🐛 Issues Conocidos
+## Issues Conocidos
 
 - [ ] El gauge circular no se redimensiona correctamente en pantallas muy pequeñas
 - [ ] Las animaciones pueden saltar en dispositivos de gama baja
@@ -94,7 +95,7 @@
 
 ---
 
-## 📐 Deuda Técnica
+## Deuda Técnica
 
 - [ ] Extraer DashboardScreen en widgets más pequeños
 - [ ] Agregar type hints completos en todos los métodos
