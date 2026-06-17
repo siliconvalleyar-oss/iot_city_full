@@ -34,7 +34,7 @@ set(HEADERS
     src/widgets/devicedialog.h src/widgets/logpanel.h src/utils/settings.h
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${QT_LIBS})
 
