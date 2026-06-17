@@ -1,0 +1,12 @@
+
+
+
+#ignorar
+iot_city/
+
+prompt.txt
+
+# Android signing
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
