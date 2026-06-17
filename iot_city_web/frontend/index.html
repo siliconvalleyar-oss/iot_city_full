@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT City — Red Inteligente</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #050d1a;
+    --bg2: #0a1628;
+    --bg3: #0f1f3d;
+    --panel: #091428;
+    --border: #1a3a6b;
+    --border2: #2a5aa0;
+    --accent: #00d4ff;
+    --accent2: #0080ff;
+    --green: #00ff88;
+    --amber: #ffaa00;
+    --red: #ff3344;
+    --gray: #556688;
+    --text: #c8d8f0;
+    --text2: #7090b0;
+    --font: 'JetBrains Mono', monospace;
+    --title: 'Orbitron', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOPBAR ── */
+  #topbar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 8px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-family: var(--title);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .logo span { color: var(--text2); font-size: 11px; display: block; letter-spacing: 1px; }
+
+  .metrics-bar {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    align-items: center;
+  }
+
+  .metric-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .metric-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot-red   { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+  .dot-amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .dot-gray  { background: var(--gray); }
+  .dot-blue  { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+  .top-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: var(--font);
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn:hover { background: var(--bg3); border-color: var(--accent); }
+  .btn.danger { color: var(--red); border-color: var(--red); }
+  .btn.danger:hover { background: rgba(255,51,68,0.1); }
+  .btn.success { color: var(--green); border-color: var(--green); }
+  .btn.success:hover { background: rgba(0,255,136,0.1); }
+  .btn.active { background: var(--accent2); color: white; border-color: var(--accent2); }
+
+  /* ── MAIN LAYOUT ── */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── LEFT SIDEBAR ── */
+  #sidebar-left {
+    width: 220px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-section {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-title {
+    font-family: var(--title);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--font);
+    font-size: 11px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--bg3);
+    border-color: var(--border);
+    color: var(--text);
+  }
+
+  .filter-btn .badge {
+    margin-left: auto;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 10px;
+    color: var(--accent);
+  }
+
+  #device-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  #device-list::-webkit-scrollbar { width: 4px; }
+  #device-list::-webkit-scrollbar-track { background: transparent; }
+  #device-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .dev-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+
+  .dev-item:hover { background: var(--bg3); border-color: var(--border); }
+  .dev-item.selected { background: var(--bg3); border-color: var(--accent2); }
+
+  .dev-status {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dev-info { flex: 1; min-width: 0; }
+  .dev-id { font-size: 10px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dev-street { font-size: 9px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── MAP AREA ── */
+  #map-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(rgba(0,100,200,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,100,200,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-color: var(--bg);
+  }
+
+  #map-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+
+  #city-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: none;
+  }
+
+  /* Tooltip */
+  #tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text);
+    z-index: 1000;
+    display: none;
+    max-width: 200px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  /* Map controls */
+  #map-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 50;
+  }
+
+  .map-btn {
+    width: 32px; height: 32px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .map-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Legend */
+  #legend {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 10px;
+    z-index: 50;
+  }
+
+  .legend-title { color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    color: var(--text2);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ── RIGHT PANEL ── */
+  #panel-right {
+    width: 280px;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-family: var(--title);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+
+  #detail-panel {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  #detail-panel::-webkit-scrollbar { width: 4px; }
+  #detail-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .detail-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text2);
+    font-size: 11px;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .detail-icon { font-size: 32px; opacity: 0.3; }
+
+  .detail-field {
+    margin-bottom: 12px;
+  }
+
+  .field-label {
+    font-size: 9px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+  }
+
+  .field-value {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .field-value.green { color: var(--green); }
+  .field-value.red   { color: var(--red); }
+  .field-value.amber { color: var(--amber); }
+  .field-value.gray  { color: var(--gray); }
+
+  .detail-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .detail-actions .btn {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    padding: 7px 8px;
+  }
+
+  .gauge-bar {
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .gauge-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s;
+  }
+
+  .connected-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .conn-chip {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 7px;
+    font-size: 9px;
+    color: var(--accent);
+    cursor: pointer;
+  }
+
+  .conn-chip:hover { border-color: var(--accent); }
+
+  /* Log panel */
+  #log-panel {
+    height: 160px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  #log-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+
+  #log-list::-webkit-scrollbar { width: 3px; }
+  #log-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .log-entry {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 3px;
+    line-height: 1.4;
+  }
+
+  .log-time { color: var(--text2); flex-shrink: 0; }
+  .log-type { flex-shrink: 0; font-weight: 500; }
+  .log-type.add    { color: var(--green); }
+  .log-type.remove { color: var(--red); }
+  .log-type.fail   { color: var(--red); }
+  .log-type.update { color: var(--accent); }
+  .log-type.power  { color: var(--amber); }
+  .log-text { color: var(--text2); }
+
+  /* Modal */
+  #modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,20,0.8);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #modal-overlay.open { display: flex; }
+
+  #modal {
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 24px;
+    width: 380px;
+    max-width: 90vw;
+  }
+
+  .modal-title {
+    font-family: var(--title);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-label {
+    font-size: 9px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .form-input, .form-select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+  /* Scan animation */
+  @keyframes scan {
+    0% { transform: translateY(-100%); opacity: 0.5; }
+    100% { transform: translateY(100vh); opacity: 0; }
+  }
+
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    pointer-events: none;
+    animation: scan 4s linear infinite;
+    z-index: 5;
+    opacity: 0.3;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.9); }
+  }
+
+  .ws-indicator {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gray);
+    flex-shrink: 0;
+  }
+
+  .ws-indicator.connected { background: var(--green); animation: pulse 2s ease-in-out infinite; }
+
+  /* Notification */
+  #notif {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+  }
+
+  .notif-item {
+    background: var(--panel);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 8px 14px;
+    font-size: 11px;
+    color: var(--text);
+    animation: slideIn 0.2s ease, fadeOut 0.3s 2.7s forwards;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+
+  .notif-item.err { border-color: var(--red); }
+  .notif-item.ok  { border-color: var(--green); }
+
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+  /* Overlay toggle buttons */
+  #overlay-controls {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    gap: 6px;
+    z-index: 50;
+  }
+
+  .overlay-btn {
+    font-family: var(--font);
+    font-size: 9px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text2);
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+
+  .overlay-btn:hover { border-color: var(--border2); color: var(--text); }
+  .overlay-btn.on { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.08); }
+
+  /* ── COLOR PICKER ICON SELECTOR ── */
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .icon-opt {
+    width: 40px; height: 40px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.15s;
+  }
+
+  .icon-opt:hover, .icon-opt.selected {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.1);
+  }
+
+  /* ── ADMIN MODAL ── */
+  #admin-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,20,0.8);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #admin-overlay.open { display: flex; }
+
+  #admin-modal {
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 24px;
+    width: 700px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .palette-card {
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .palette-card:hover { border-color: var(--accent); }
+  .palette-card.active { border-color: var(--accent); background: rgba(0,212,255,0.08); }
+
+  .palette-preview {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 4px;
+    justify-content: center;
+  }
+
+  .palette-preview span {
+    width: 18px; height: 18px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .palette-name {
+    font-size: 9px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .palette-card.add-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--text2);
+    border-style: dashed;
+  }
+
+  .palette-card.add-card:hover { border-color: var(--accent); color: var(--accent); }
+
+  .palette-card .del-btn {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--red);
+    background: var(--panel);
+    color: var(--red);
+    font-size: 9px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .palette-card.custom:hover .del-btn { display: flex; }
+  .palette-card.custom { position: relative; }
+
+  .pe-colors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+
+  .pe-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pe-row label {
+    font-size: 8px;
+    color: var(--text2);
+    text-transform: uppercase;
+    width: 50px;
+    flex-shrink: 0;
+  }
+
+  .pe-row input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 9px;
+    padding: 3px 5px;
+    outline: none;
+  }
+
+  .pe-row input:focus { border-color: var(--accent); }
+
+  .pe-row input[type="color"] {
+    width: 24px;
+    height: 24px;
+    padding: 1px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════ */
+  /*  M O B I L E   R E S P O N S I V E      */
+  /* ═══════════════════════════════════════ */
+
+  #mobile-hamburger { display: none; }
+  #mobile-details-btn { display: none; }
+  #sidebar-overlay { display: none; }
+
+  @media (max-width: 768px) {
+    #topbar { gap: 6px; padding: 5px 8px; flex-wrap: nowrap; }
+    .logo { font-size: 11px; letter-spacing: 1px; }
+    .logo span { display: none; }
+
+    .top-actions { gap: 3px; }
+    .top-actions .btn { font-size: 8px; padding: 3px 6px; letter-spacing: 0; }
+    .top-actions .btn:nth-child(n+4) { display: none; }
+
+    .metrics-bar { gap: 3px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .metrics-bar::-webkit-scrollbar { display: none; }
+    .metric-pill { font-size: 7px; padding: 2px 5px; flex-shrink: 0; }
+    .metric-pill .dot { width: 4px; height: 4px; }
+
+    #mobile-hamburger {
+      display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; flex-shrink: 0;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 4px; color: var(--text); font-size: 16px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    #mobile-hamburger:hover { border-color: var(--accent); color: var(--accent); }
+    #mobile-hamburger.open { background: var(--bg3); border-color: var(--accent); }
+
+    #sidebar-left { display: none; }
+
+    #sidebar-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,20,0.6); z-index: 200;
+    }
+    #sidebar-overlay.open { display: block; }
+
+    #sidebar-left.mobile-open {
+      display: flex;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: 260px; z-index: 201;
+      animation: slideInLeft 0.2s ease;
+      border-right: 1px solid var(--border2);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    }
+
+    @keyframes slideInLeft {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+    @keyframes slideInUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    #panel-right { display: none; }
+
+    #panel-right.mobile-open {
+      display: flex;
+      position: fixed; top: auto; left: 0; right: 0; bottom: 0;
+      width: 100%; height: 50vh; z-index: 201;
+      border-left: none; border-top: 1px solid var(--border2);
+      animation: slideInUp 0.25s ease;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+      border-radius: 12px 12px 0 0;
+    }
+    #panel-right.mobile-open #log-panel {
+      height: 70px;
+    }
+
+    #mobile-details-btn {
+      display: flex; align-items: center; justify-content: center;
+      position: absolute; bottom: 76px; right: 14px;
+      width: 42px; height: 42px; z-index: 45;
+      background: var(--panel); border: 1px solid var(--border2);
+      border-radius: 50%; color: var(--text); font-size: 18px;
+      cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+    #mobile-details-btn:active { background: var(--bg3); border-color: var(--accent); }
+
+    .panel-header { padding: 8px 12px; }
+    .panel-title { font-size: 8px; }
+    #detail-panel { padding: 10px; }
+    .detail-empty { height: 100px; font-size: 10px; }
+    .detail-field { margin-bottom: 8px; }
+    .field-value { font-size: 11px; }
+    .detail-actions .btn { font-size: 8px; padding: 5px 5px; }
+
+    #overlay-controls { top: 8px; left: 8px; gap: 3px; }
+    .overlay-btn { font-size: 7px; padding: 3px 6px; }
+
+    #legend {
+      bottom: 72px; left: 8px;
+      padding: 5px 8px; font-size: 7px;
+    }
+    .legend-item { margin-bottom: 2px; gap: 4px; }
+    .legend-dot { width: 6px; height: 6px; }
+    .legend-title { font-size: 7px; margin-bottom: 3px; }
+
+    #map-controls { bottom: 10px; right: 10px; gap: 3px; }
+    .map-btn { width: 38px; height: 38px; font-size: 17px; }
+
+    #tooltip { font-size: 9px; padding: 5px 8px; max-width: 150px; }
+    #notif { top: 48px; right: 8px; }
+    .notif-item { font-size: 9px; padding: 5px 8px; }
+  }
+
+  @media (max-width: 480px) {
+    #topbar { padding: 3px 5px; gap: 3px; }
+    .logo { font-size: 9px; }
+    .metric-pill { font-size: 6px; padding: 1px 4px; }
+    .metric-pill span:not(.dot) strong { font-size: 6px; }
+    .top-actions .btn:nth-child(n+3) { display: none; }
+    #sidebar-left.mobile-open { width: 200px; }
+    #panel-right.mobile-open { height: 60vh; }
+    #mobile-details-btn { width: 36px; height: 36px; font-size: 15px; }
+    .map-btn { width: 34px; height: 34px; font-size: 15px; }
+    #legend { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo">
+    IOT CITY
+    <span>SMART GRID v1.0</span>
+  </div>
+
+  <div class="metrics-bar" id="metrics-bar">
+    <div class="metric-pill">
+      <div class="ws-indicator" id="ws-dot"></div>
+      <span id="ws-label">Conectando…</span>
+    </div>
+    <div class="metric-pill">
+      <div class="dot dot-blue"></div>
+      <span>Total: <strong id="m-total">—</strong></span>
+    </div>
+    <div class="metric-pill">
+      <div class="dot dot-green"></div>
+      <span>Activos: <strong id="m-active">—</strong></span>
+    </div>
+    <div class="metric-pill">
+      <div class="dot dot-red"></div>
+      <span>Sin tensión: <strong id="m-nopwr">—</strong></span>
+    </div>
+    <div class="metric-pill">
+      <div class="dot dot-amber"></div>
+      <span>Consumo: <strong id="m-power">—</strong> W</span>
+    </div>
+    <div class="metric-pill">
+      <div class="dot dot-green"></div>
+      <span>Red: <strong id="m-health">—</strong>%</span>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <button class="btn" onclick="openAddModal()">+ Agregar</button>
+    <button class="btn danger" onclick="simulateBlackout()">⚡ Corte</button>
+    <button class="btn success" onclick="simulateRestore()">✓ Restaurar</button>
+    <button class="btn" onclick="openApiDocs()">API Docs</button>
+    <button class="btn" onclick="openAdmin()">⚙ Admin</button>
+    <button id="mobile-hamburger" onclick="toggleMobileSidebar()" title="Dispositivos">☰</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- SIDEBAR LEFT -->
+  <div id="sidebar-left">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Filtros</div>
+      <button class="filter-btn active" id="f-all" onclick="setFilter('all')">
+        ◈ Todos <span class="badge" id="fb-all">0</span>
+      </button>
+      <button class="filter-btn" id="f-router" onclick="setFilter('router')">
+        ◆ Routers <span class="badge" id="fb-router">0</span>
+      </button>
+      <button class="filter-btn" id="f-end" onclick="setFilter('end_device')">
+        ◇ End Devices <span class="badge" id="fb-end">0</span>
+      </button>
+      <button class="filter-btn" id="f-camera" onclick="setFilter('camera')">
+        📷 Cámaras <span class="badge" id="fb-camera">0</span>
+      </button>
+      <button class="filter-btn" id="f-off" onclick="setFilter('off')">
+        ● Sin energía <span class="badge" id="fb-off">0</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Dispositivos</div>
+    </div>
+    <div id="device-list"></div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map-area">
+    <div class="scan-line"></div>
+
+    <canvas id="city-canvas"></canvas>
+    <canvas id="map-canvas"></canvas>
+
+    <!-- Overlay controls -->
+    <div id="overlay-controls">
+      <button class="overlay-btn on" id="ov-mesh" onclick="toggleOverlay('mesh')">Mesh</button>
+      <button class="overlay-btn on" id="ov-labels" onclick="toggleOverlay('labels')">Labels</button>
+      <button class="overlay-btn on" id="ov-coverage" onclick="toggleOverlay('coverage')">Cobertura</button>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip"></div>
+
+    <!-- Legend -->
+    <div id="legend">
+      <div class="legend-title">Estado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#00ff88;box-shadow:0 0 6px #00ff88"></div>Activo</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff3344;box-shadow:0 0 6px #ff3344"></div>Apagado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffaa00;box-shadow:0 0 6px #ffaa00"></div>Alerta</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#556688"></div>Sin tensión</div>
+    </div>
+
+    <!-- Mobile detail button -->
+    <button id="mobile-details-btn" onclick="toggleMobileDetail()" title="Detalles">ℹ</button>
+
+    <!-- Map controls -->
+    <div id="map-controls">
+      <button class="map-btn" onclick="zoomIn()">+</button>
+      <button class="map-btn" onclick="zoomOut()">−</button>
+      <button class="map-btn" onclick="resetView()">⌂</button>
+    </div>
+  </div>
+
+  <!-- Sidebar overlay for mobile -->
+  <div id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+  <!-- RIGHT PANEL -->
+  <div id="panel-right">
+    <div class="panel-header">
+      <span class="panel-title">Detalles</span>
+      <button class="btn" style="padding:3px 8px;font-size:10px" onclick="closeDetail()">✕</button>
+    </div>
+
+    <div id="detail-panel">
+      <div class="detail-empty">
+        <div class="detail-icon">◈</div>
+        <div>Seleccioná un dispositivo<br>en el mapa</div>
+      </div>
+    </div>
+
+    <div id="log-panel">
+      <div class="panel-header">
+        <span class="panel-title">Log de Red</span>
+        <button class="btn" style="padding:3px 8px;font-size:10px" onclick="clearLogs()">Limpiar</button>
+      </div>
+      <div id="log-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL ADD DEVICE -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div id="modal">
+    <div class="modal-title">➕ Nuevo Dispositivo</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ID</label>
+        <input class="form-input" id="f-id" placeholder="LAMP_001">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="f-type">
+          <option value="router">Router</option>
+          <option value="end_device">End Device</option>
+          <option value="camera">📷 Cámara</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">X</label>
+        <input class="form-input" id="f-x" type="number" placeholder="400">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Y</label>
+        <input class="form-input" id="f-y" type="number" placeholder="300">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Calle / Ubicación</label>
+      <input class="form-input" id="f-street" placeholder="Av. Mitre 123">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <input class="form-input" id="f-color" type="color" value="#FFD700" style="height:36px;padding:2px">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ícono</label>
+        <select class="form-select" id="f-icon">
+          <option value="lamp">💡 Luminaria</option>
+          <option value="traffic">🚦 Semáforo</option>
+          <option value="sensor">📡 Sensor</option>
+          <option value="camera">📷 Cámara</option>
+          <option value="gateway">🔌 Gateway</option>
+          <option value="sign">⚠️ Cartel</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn success" onclick="addDevice()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div id="admin-overlay" onclick="if(event.target===this)closeAdmin()">
+  <div id="admin-modal">
+    <div class="modal-title">⚙ Administración</div>
+
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <!-- Palette -->
+      <div style="flex:2;min-width:240px">
+        <div class="form-label">Paleta de colores</div>
+        <div class="palette-grid" id="palette-grid"></div>
+        <!-- Palette editor (hidden by default), dentro de la misma columna -->
+        <div id="palette-editor" style="margin-top:8px;display:none">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div class="form-label" style="margin:0">Editor de paleta</div>
+            <button class="btn" id="pe-cancel" onclick="cancelPaletteEdit()" style="padding:2px 8px;font-size:9px">✕</button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre</label>
+            <input class="form-input" id="pe-name" placeholder="mi-paleta" style="font-size:11px;padding:5px 8px">
+          </div>
+          <div class="pe-colors" id="pe-colors"></div>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="btn success" onclick="saveCustomPalette()" style="flex:1;text-align:center;font-size:9px">Guardar paleta</button>
+            <button class="btn danger" id="pe-delete" onclick="deleteCustomPalette()" style="flex:1;text-align:center;font-size:9px;display:none">Eliminar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div style="flex:1;min-width:180px">
+        <div class="form-group">
+          <label class="form-label">Host MQTT</label>
+          <input class="form-input" id="s-mqtt-host" value="localhost">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Intervalo simulación (s)</label>
+          <input class="form-input" id="s-sim-interval" type="number" value="3" min="1" max="30">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zoom predeterminado</label>
+          <input class="form-input" id="s-zoom" type="number" value="1" min="0.2" max="4" step="0.1">
+        </div>
+      </div>
+
+      <!-- Data management -->
+      <div style="flex:1;min-width:160px">
+        <div class="form-label">Datos</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+          <button class="btn success" onclick="exportData()" style="text-align:center">📥 Exportar JSON</button>
+          <button class="btn danger" onclick="resetData()" style="text-align:center">⟳ Reset a demo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="btn" onclick="closeAdmin()">Cerrar</button>
+      <button class="btn success" onclick="saveAdmin()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div id="notif"></div>
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────
+// ESTADO
+// ──────────────────────────────────────────────────────────────────────────
+
+const API = `http://${location.hostname}:5062/api`;
+const WS_URL = `ws://${location.hostname}:5062/ws`;
+
+let devices = {};
+let selectedId = null;
+let filter = 'all';
+let ws = null;
+let zoom = 1;
+let panX = 0, panY = 0;
+let isDragging = false;
+let dragDevice = null;
+let dragStartX, dragStartY, dragDevX, dragDevY;
+let mouseMapX = 0, mouseMapY = 0;
+
+let overlays = { mesh: true, labels: true, coverage: true };
+
+const ICON_MAP = {
+  lamp: '💡', traffic: '🚦', sensor: '📡',
+  camera: '📷', gateway: '🔌', sign: '⚠️'
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// CANVAS
+// ──────────────────────────────────────────────────────────────────────────
+
+const canvas = document.getElementById('map-canvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const area = document.getElementById('map-area');
+  canvas.width = area.clientWidth;
+  canvas.height = area.clientHeight;
+  draw();
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function worldToScreen(x, y) {
+  return {
+    x: x * zoom + panX,
+    y: y * zoom + panY
+  };
+}
+
+function screenToWorld(sx, sy) {
+  return {
+    x: (sx - panX) / zoom,
+    y: (sy - panY) / zoom
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// DRAW
+// ──────────────────────────────────────────────────────────────────────────
+
+function getDeviceColor(dev) {
+  if (!dev.powered) return '#556688';
+  if (!dev.active) return '#ff3344';
+  if (dev.level < 50) return '#ffaa00';
+  return '#00ff88';
+}
+
+function getDeviceGlow(dev) {
+  if (!dev.powered) return 'rgba(85,102,136,0.3)';
+  if (!dev.active) return 'rgba(255,51,68,0.4)';
+  if (dev.level < 50) return 'rgba(255,170,0,0.4)';
+  return 'rgba(0,255,136,0.4)';
+}
+
+function draw() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const devArr = Object.values(devices);
+
+  // Grid lines (city blocks)
+  ctx.save();
+  ctx.strokeStyle = 'rgba(26,58,107,0.4)';
+  ctx.lineWidth = 1;
+  // Streets
+  const streetPositions = [120, 235, 350, 465];
+  streetPositions.forEach(y => {
+    const s = worldToScreen(0, y);
+    const e = worldToScreen(800, y);
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(e.x, e.y);
+    ctx.stroke();
+  });
+  streetPositions.forEach(x => {
+    const s = worldToScreen(x, 0);
+    const e = worldToScreen(x, 600);
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(e.x, e.y);
+    ctx.stroke();
+  });
+  ctx.restore();
+
+  // MESH LINKS
+  if (overlays.mesh) {
+    const seen = new Set();
+    devArr.forEach(dev => {
+      (dev.connected_to || []).forEach(nid => {
+        const key = [dev.id, nid].sort().join('|');
+        if (seen.has(key) || !devices[nid]) return;
+        seen.add(key);
+
+        const neighbor = devices[nid];
+        const s = worldToScreen(dev.x, dev.y);
+        const e = worldToScreen(neighbor.x, neighbor.y);
+
+        const bothPowered = dev.powered && neighbor.powered;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(e.x, e.y);
+
+        if (bothPowered) {
+          ctx.strokeStyle = 'rgba(0,128,255,0.35)';
+          ctx.lineWidth = 1.5 * zoom;
+          ctx.setLineDash([6 * zoom, 4 * zoom]);
+        } else {
+          ctx.strokeStyle = 'rgba(85,102,136,0.2)';
+          ctx.lineWidth = 1 * zoom;
+          ctx.setLineDash([]);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        // Animated packet (router only)
+        if (bothPowered && dev.device_type === 'router') {
+          const t = (Date.now() / 1500) % 1;
+          const px = s.x + (e.x - s.x) * t;
+          const py = s.y + (e.y - s.y) * t;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(px, py, 3 * zoom, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,212,255,0.8)';
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+    });
+  }
+
+  // COVERAGE RINGS
+  if (overlays.coverage) {
+    devArr.forEach(dev => {
+      if (!dev.powered || dev.device_type !== 'router') return;
+      const s = worldToScreen(dev.x, dev.y);
+      const r = 80 * zoom;
+      ctx.save();
+      const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r);
+      grad.addColorStop(0, 'rgba(0,128,255,0.08)');
+      grad.addColorStop(1, 'rgba(0,128,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  // DEVICES
+  const filtered = getFilteredDevices();
+  devArr.forEach(dev => {
+    const s = worldToScreen(dev.x, dev.y);
+    const isSelected = dev.id === selectedId;
+    const inFilter = filtered.has(dev.id);
+    const r = (dev.device_type === 'router' ? 14 : 10) * zoom;
+
+    ctx.save();
+    ctx.globalAlpha = inFilter ? 1 : 0.3;
+
+    // Glow
+    if (dev.powered) {
+      ctx.shadowColor = getDeviceGlow(dev);
+      ctx.shadowBlur = 16;
+    }
+
+    // Body
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = getDeviceColor(dev);
+    ctx.fill();
+
+    // Router ring
+    if (dev.device_type === 'router') {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r + 3 * zoom, 0, Math.PI * 2);
+      ctx.strokeStyle = getDeviceColor(dev);
+      ctx.lineWidth = 1 * zoom;
+      ctx.globalAlpha = inFilter ? 0.4 : 0.1;
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = inFilter ? 1 : 0.3;
+    ctx.shadowBlur = 0;
+
+    // Selection ring
+    if (isSelected) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r + 6 * zoom, 0, Math.PI * 2);
+      ctx.strokeStyle = '#00d4ff';
+      ctx.lineWidth = 2 * zoom;
+      ctx.globalAlpha = 0.8;
+      ctx.stroke();
+    }
+
+    // Icon
+    const icon = ICON_MAP[dev.icon] || '💡';
+    ctx.font = `${Math.max(10, r * 1.1)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(icon, s.x, s.y);
+
+    // Label
+    if (overlays.labels && zoom > 0.6) {
+      ctx.font = `${Math.max(8, 10 * zoom)}px 'JetBrains Mono', monospace`;
+      ctx.fillStyle = 'rgba(200,216,240,0.9)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.shadowColor = '#000';
+      ctx.shadowBlur = 3;
+      ctx.fillText(dev.id, s.x, s.y + r + 3 * zoom);
+    }
+
+    ctx.restore();
+  });
+
+  // Request next frame for animation
+  requestAnimationFrame(draw);
+}
+
+function getFilteredDevices() {
+  const all = Object.values(devices);
+  let result;
+  if (filter === 'all') result = all;
+  else if (filter === 'router') result = all.filter(d => d.device_type === 'router');
+  else if (filter === 'end_device') result = all.filter(d => d.device_type === 'end_device');
+  else if (filter === 'camera') result = all.filter(d => d.device_type === 'camera');
+  else if (filter === 'off') result = all.filter(d => !d.powered);
+  else result = all;
+  return new Set(result.map(d => d.id));
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// INTERACTION (mouse + touch)
+// ──────────────────────────────────────────────────────────────────────────
+
+function getTouchPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches ? e.touches[0] : e;
+  return {
+    offsetX: (touch.clientX - rect.left) * (canvas.width / rect.width),
+    offsetY: (touch.clientY - rect.top) * (canvas.height / rect.height)
+  };
+}
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const pos = getTouchPos(e);
+  touchId = e.changedTouches[0].identifier;
+  const { x, y } = screenToWorld(pos.offsetX, pos.offsetY);
+  const hit = getDeviceAt(x, y);
+
+  if (hit) {
+    dragDevice = hit;
+    dragStartX = pos.offsetX;
+    dragStartY = pos.offsetY;
+    dragDevX = hit.x;
+    dragDevY = hit.y;
+  } else {
+    isDragging = true;
+    dragStartX = pos.offsetX;
+    dragStartY = pos.offsetY;
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const pos = getTouchPos(e);
+
+  if (dragDevice) {
+    const dx = pos.offsetX - dragStartX;
+    const dy = pos.offsetY - dragStartY;
+    dragDevice.x = dragDevX + dx / zoom;
+    dragDevice.y = dragDevY + dy / zoom;
+    return;
+  }
+
+  if (isDragging) {
+    panX += (pos.offsetX - dragStartX);
+    panY += (pos.offsetY - dragStartY);
+    dragStartX = pos.offsetX;
+    dragStartY = pos.offsetY;
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchend', async e => {
+  e.preventDefault();
+
+  if (dragDevice) {
+    const dev = dragDevice;
+    dragDevice = null;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: 'move',
+        device_id: dev.id,
+        x: Math.round(dev.x),
+        y: Math.round(dev.y)
+      }));
+    }
+    return;
+  }
+
+  if (isDragging) {
+    isDragging = false;
+    return;
+  }
+
+  // Tap on device → select + show detail
+  const pos = getTouchPos(e.changedTouches[0]);
+  const { x, y } = screenToWorld(pos.offsetX, pos.offsetY);
+  const hit = getDeviceAt(x, y);
+  if (hit) {
+    selectDevice(hit.id);
+    // On mobile, also show detail panel
+    if (window.innerWidth <= 768) {
+      document.getElementById('panel-right').classList.add('mobile-open');
+    }
+  } else {
+    selectDevice(null);
+  }
+}, { passive: false });
+
+canvas.addEventListener('mousedown', e => {
+  const { x, y } = screenToWorld(e.offsetX, e.offsetY);
+  const hit = getDeviceAt(x, y);
+
+  if (hit) {
+    dragDevice = hit;
+    dragStartX = e.offsetX;
+    dragStartY = e.offsetY;
+    dragDevX = hit.x;
+    dragDevY = hit.y;
+    canvas.style.cursor = 'grabbing';
+  } else {
+    isDragging = true;
+    dragStartX = e.offsetX;
+    dragStartY = e.offsetY;
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  const dx = e.offsetX - dragStartX;
+  const dy = e.offsetY - dragStartY;
+  const { x, y } = screenToWorld(e.offsetX, e.offsetY);
+  mouseMapX = Math.round(x);
+  mouseMapY = Math.round(y);
+
+  if (dragDevice) {
+    dragDevice.x = dragDevX + dx / zoom;
+    dragDevice.y = dragDevY + dy / zoom;
+    return;
+  }
+
+  if (isDragging) {
+    panX += e.movementX;
+    panY += e.movementY;
+    return;
+  }
+
+  // Hover tooltip
+  const hit = getDeviceAt(x, y);
+  if (hit) {
+    canvas.style.cursor = 'pointer';
+    showTooltip(e.offsetX, e.offsetY, hit);
+  } else {
+    canvas.style.cursor = 'default';
+    hideTooltip();
+  }
+});
+
+canvas.addEventListener('mouseup', async e => {
+  if (dragDevice) {
+    const dev = dragDevice;
+    dragDevice = null;
+    canvas.style.cursor = 'default';
+
+    // Save position via WebSocket
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: 'move',
+        device_id: dev.id,
+        x: Math.round(dev.x),
+        y: Math.round(dev.y)
+      }));
+    }
+    return;
+  }
+
+  if (isDragging) {
+    isDragging = false;
+    return;
+  }
+
+  // Click
+  const { x, y } = screenToWorld(e.offsetX, e.offsetY);
+  const hit = getDeviceAt(x, y);
+  if (hit) {
+    selectDevice(hit.id);
+  } else {
+    selectDevice(null);
+  }
+});
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.1 : 0.9;
+  const mouseX = e.offsetX;
+  const mouseY = e.offsetY;
+
+  const worldX = (mouseX - panX) / zoom;
+  const worldY = (mouseY - panY) / zoom;
+
+  zoom = Math.max(0.2, Math.min(4, zoom * factor));
+
+  panX = mouseX - worldX * zoom;
+  panY = mouseY - worldY * zoom;
+}, { passive: false });
+
+function getDeviceAt(wx, wy) {
+  const devArr = Object.values(devices);
+  for (const dev of devArr) {
+    const r = (dev.device_type === 'router' ? 14 : 10) / zoom * zoom;
+    const dx = dev.x - wx;
+    const dy = dev.y - wy;
+    if (Math.sqrt(dx*dx + dy*dy) < r * 1.5) return dev;
+  }
+  return null;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// TOOLTIP
+// ──────────────────────────────────────────────────────────────────────────
+
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(sx, sy, dev) {
+  const color = getDeviceColor(dev);
+  tooltip.style.display = 'block';
+  tooltip.style.left = (sx + 15) + 'px';
+  tooltip.style.top = (sy - 10) + 'px';
+  tooltip.innerHTML = `
+    <div style="font-weight:500;color:${color};margin-bottom:4px">${dev.id}</div>
+    <div style="color:#7090b0;font-size:10px">${dev.street}</div>
+    <div style="font-size:10px;margin-top:4px">
+      ${dev.device_type === 'router' ? '◆ Router' : dev.device_type === 'camera' ? '📷 Cámara' : '◇ End Device'}<br>
+      ${dev.powered ? '✓ Con tensión' : '✗ Sin tensión'}<br>
+      Nivel: ${dev.level}% | ${dev.consumption}W
+    </div>
+  `;
+}
+
+function hideTooltip() {
+  tooltip.style.display = 'none';
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// SELECTION & DETAIL PANEL
+// ──────────────────────────────────────────────────────────────────────────
+
+function selectDevice(id) {
+  selectedId = id;
+
+  document.querySelectorAll('.dev-item').forEach(el => {
+    el.classList.toggle('selected', el.dataset.id === id);
+  });
+
+  if (!id) {
+    document.getElementById('detail-panel').innerHTML = `
+      <div class="detail-empty">
+        <div class="detail-icon">◈</div>
+        <div>Seleccioná un dispositivo<br>en el mapa</div>
+      </div>`;
+    return;
+  }
+
+  const dev = devices[id];
+  if (!dev) return;
+
+  const color = getDeviceColor(dev);
+  const statusLabel = !dev.powered ? 'SIN TENSIÓN' : !dev.active ? 'APAGADO' : dev.level < 50 ? 'ALERTA' : 'ACTIVO';
+  const connList = (dev.connected_to || []).map(c =>
+    `<span class="conn-chip" onclick="selectDevice('${c}')">${c}</span>`
+  ).join('');
+  const endList = (dev.end_devices || []).map(c =>
+    `<span class="conn-chip" onclick="selectDevice('${c}')">${c}</span>`
+  ).join('');
+
+  document.getElementById('detail-panel').innerHTML = `
+    <div class="detail-field">
+      <div class="field-label">ID</div>
+      <div class="field-value" style="color:${color}">${dev.id}</div>
+    </div>
+    <div class="detail-field">
+      <div class="field-label">Estado</div>
+      <div class="field-value" style="color:${color}">${statusLabel}</div>
+    </div>
+    <div class="detail-field">
+      <div class="field-label">Tipo</div>
+      <div class="field-value">${dev.device_type === 'router' ? '◆ Router' : dev.device_type === 'camera' ? '📷 Cámara' : '◇ End Device'}</div>
+    </div>
+    <div class="detail-field">
+      <div class="field-label">Calle</div>
+      <div class="field-value">${dev.street}</div>
+    </div>
+    <div class="detail-field">
+      <div class="field-label">Coordenadas</div>
+      <div class="field-value">X: ${Math.round(dev.x)} / Y: ${Math.round(dev.y)}</div>
+    </div>
+    <div class="detail-field">
+      <div class="field-label">Nivel de luz</div>
+      <div class="field-value">${dev.level}%</div>
+      <div class="gauge-bar">
+        <div class="gauge-fill" style="width:${dev.level}%;background:${color}"></div>
+      </div>
+    </div>
+    <div class="detail-field">
+      <div class="field-label">Consumo</div>
+      <div class="field-value amber">${Math.round(dev.consumption)} W</div>
+    </div>
+    <div class="detail-field">
+      <div class="field-label">Señal</div>
+      <div class="field-value">${dev.signal} dBm</div>
+    </div>
+    <div class="detail-field">
+      <div class="field-label">Paquetes Tx / Rx</div>
+      <div class="field-value">${dev.packets_sent} / ${dev.packets_received}</div>
+    </div>
+    ${connList ? `<div class="detail-field">
+      <div class="field-label">Conectado a</div>
+      <div class="connected-list">${connList}</div>
+    </div>` : ''}
+    ${endList ? `<div class="detail-field">
+      <div class="field-label">End Devices</div>
+      <div class="connected-list">${endList}</div>
+    </div>` : ''}
+    <div class="detail-actions">
+      <button class="btn" onclick="toggleDevice('${id}')">${dev.active ? 'Apagar' : 'Encender'}</button>
+      <button class="btn ${dev.powered ? 'danger' : 'success'}" onclick="togglePower('${id}')">
+        ${dev.powered ? 'Cortar tensión' : 'Restaurar'}
+      </button>
+    </div>
+    <div class="detail-actions">
+      <button class="btn danger" onclick="deleteDevice('${id}')">🗑 Eliminar</button>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// API CALLS
+// ──────────────────────────────────────────────────────────────────────────
+
+async function apiFetch(path, opts = {}) {
+  try {
+    const res = await fetch(API + path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...opts
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
+  } catch (e) {
+    notify('Error: ' + e.message, 'err');
+    throw e;
+  }
+}
+
+async function loadDevices() {
+  const data = await apiFetch('/devices');
+  data.devices.forEach(d => { devices[d.id] = d; });
+  updateUI();
+}
+
+async function toggleDevice(id) {
+  const dev = await apiFetch(`/devices/${id}/toggle`, { method: 'POST' });
+  devices[id] = dev;
+  selectDevice(id);
+  updateUI();
+}
+
+async function togglePower(id) {
+  const dev = await apiFetch(`/devices/${id}/power`, { method: 'POST' });
+  devices[id] = dev;
+  selectDevice(id);
+  updateUI();
+  notify(`Tensión ${dev.powered ? 'restaurada' : 'cortada'}: ${id}`, dev.powered ? 'ok' : 'err');
+}
+
+async function deleteDevice(id) {
+  if (!confirm(`¿Eliminar ${id}?`)) return;
+  await apiFetch(`/devices/${id}`, { method: 'DELETE' });
+  delete devices[id];
+  selectDevice(null);
+  updateUI();
+  notify('Dispositivo eliminado: ' + id, 'err');
+}
+
+async function addDevice() {
+  const id = document.getElementById('f-id').value.trim();
+  const x = parseFloat(document.getElementById('f-x').value) || 400;
+  const y = parseFloat(document.getElementById('f-y').value) || 300;
+  const street = document.getElementById('f-street').value || 'Sin nombre';
+  const device_type = document.getElementById('f-type').value;
+  const icon = document.getElementById('f-icon').value;
+  const color = document.getElementById('f-color').value;
+
+  if (!id) { notify('ID requerido', 'err'); return; }
+
+  const dev = await apiFetch('/devices', {
+    method: 'POST',
+    body: JSON.stringify({ id, x, y, street, device_type, icon, color })
+  });
+
+  devices[id] = dev;
+  closeModal();
+  selectDevice(id);
+  updateUI();
+  notify('Dispositivo agregado: ' + id, 'ok');
+}
+
+async function simulateBlackout() {
+  if (!confirm('¿Simular corte total de energía?')) return;
+  await apiFetch('/simulate/blackout', { method: 'POST' });
+  await loadDevices();
+  notify('⚡ Corte de energía total', 'err');
+}
+
+async function simulateRestore() {
+  await apiFetch('/simulate/restore', { method: 'POST' });
+  await loadDevices();
+  notify('✓ Red restaurada completamente', 'ok');
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// UI UPDATES
+// ──────────────────────────────────────────────────────────────────────────
+
+function updateUI() {
+  updateMetrics();
+  updateDeviceList();
+  updateFilters();
+}
+
+function updateMetrics() {
+  const devArr = Object.values(devices);
+  const total = devArr.length;
+  const active = devArr.filter(d => d.active).length;
+  const noPwr = devArr.filter(d => !d.powered).length;
+  const power = devArr.filter(d => d.powered).reduce((s, d) => s + (d.consumption || 0), 0);
+  const health = total ? Math.round((devArr.filter(d => d.powered).length / total) * 100) : 0;
+
+  document.getElementById('m-total').textContent = total;
+  document.getElementById('m-active').textContent = active;
+  document.getElementById('m-nopwr').textContent = noPwr;
+  document.getElementById('m-power').textContent = Math.round(power);
+  document.getElementById('m-health').textContent = health;
+}
+
+function updateFilters() {
+  const devArr = Object.values(devices);
+  document.getElementById('fb-all').textContent = devArr.length;
+  document.getElementById('fb-router').textContent = devArr.filter(d => d.device_type === 'router').length;
+  document.getElementById('fb-end').textContent = devArr.filter(d => d.device_type === 'end_device').length;
+  document.getElementById('fb-camera').textContent = devArr.filter(d => d.device_type === 'camera').length;
+  document.getElementById('fb-off').textContent = devArr.filter(d => !d.powered).length;
+}
+
+function updateDeviceList() {
+  const list = document.getElementById('device-list');
+  const devArr = Object.values(devices);
+  const filtered = getFilteredDevices();
+
+  list.innerHTML = devArr
+    .filter(d => filtered.has(d.id))
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map(dev => {
+      const color = getDeviceColor(dev);
+      return `<div class="dev-item ${dev.id === selectedId ? 'selected' : ''}"
+        data-id="${dev.id}"
+        onclick="selectDevice('${dev.id}')">
+        <div class="dev-status" style="background:${color};box-shadow:0 0 4px ${color}"></div>
+        <div class="dev-info">
+          <div class="dev-id">${dev.id}</div>
+          <div class="dev-street">${dev.street}</div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function setFilter(f) {
+  filter = f;
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('f-' + (f === 'end_device' ? 'end' : f === 'camera' ? 'camera' : f)).classList.add('active');
+  updateDeviceList();
+}
+
+function toggleOverlay(name) {
+  overlays[name] = !overlays[name];
+  const btn = document.getElementById('ov-' + name);
+  btn.classList.toggle('on', overlays[name]);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// MOBILE TOGGLES
+// ──────────────────────────────────────────────────────────────────────────
+
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('sidebar-left');
+  const overlay = document.getElementById('sidebar-overlay');
+  const hamburger = document.getElementById('mobile-hamburger');
+  const isOpen = sidebar.classList.contains('mobile-open');
+  sidebar.classList.toggle('mobile-open');
+  overlay.classList.toggle('open');
+  hamburger.classList.toggle('open');
+}
+
+function toggleMobileDetail() {
+  const panel = document.getElementById('panel-right');
+  panel.classList.toggle('mobile-open');
+}
+
+function closeDetail() {
+  selectDevice(null);
+  document.getElementById('panel-right').classList.remove('mobile-open');
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// MODAL
+// ──────────────────────────────────────────────────────────────────────────
+
+function openAddModal() {
+  document.getElementById('f-id').value = `DEV_${String(Object.keys(devices).length + 1).padStart(3, '0')}`;
+  document.getElementById('f-x').value = Math.round(mouseMapX) || 400;
+  document.getElementById('f-y').value = Math.round(mouseMapY) || 300;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// MAP CONTROLS
+// ──────────────────────────────────────────────────────────────────────────
+
+function zoomIn()  { zoom = Math.min(4, zoom * 1.2); }
+function zoomOut() { zoom = Math.max(0.2, zoom / 1.2); }
+
+function resetView() {
+  zoom = 1;
+  const W = canvas.width, H = canvas.height;
+  panX = W / 2 - 400;
+  panY = H / 2 - 250;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// LOG
+// ──────────────────────────────────────────────────────────────────────────
+
+function addLog(entry) {
+  const list = document.getElementById('log-list');
+  const t = new Date(entry.timestamp || Date.now()).toLocaleTimeString('es-AR', { hour12: false });
+  const typeMap = {
+    device_added: ['add', 'ADD'],
+    device_removed: ['remove', 'DEL'],
+    device_updated: ['update', 'UPD'],
+    device_toggled: ['update', 'TGL'],
+    power_event: ['power', 'PWR'],
+    node_failure: ['fail', 'FAIL'],
+    blackout: ['fail', 'BLKOUT'],
+    restore: ['add', 'RST'],
+  };
+  const [cls, label] = typeMap[entry.event_type] || ['update', entry.event_type?.toUpperCase() || 'EVT'];
+
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = `
+    <span class="log-time">${t}</span>
+    <span class="log-type ${cls}">${label}</span>
+    <span class="log-text">${entry.device_id} ${entry.detail ? '— ' + entry.detail : ''}</span>
+  `;
+  list.insertBefore(div, list.firstChild);
+
+  while (list.children.length > 100) list.removeChild(list.lastChild);
+}
+
+function clearLogs() {
+  document.getElementById('log-list').innerHTML = '';
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// NOTIFICATIONS
+// ──────────────────────────────────────────────────────────────────────────
+
+function notify(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'notif-item' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  document.getElementById('notif').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// WEBSOCKET
+// ──────────────────────────────────────────────────────────────────────────
+
+function connectWS() {
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    document.getElementById('ws-dot').classList.add('connected');
+    document.getElementById('ws-label').textContent = 'Conectado';
+    notify('WebSocket conectado', 'ok');
+  };
+
+  ws.onclose = () => {
+    document.getElementById('ws-dot').classList.remove('connected');
+    document.getElementById('ws-label').textContent = 'Reconectando…';
+    setTimeout(connectWS, 3000);
+  };
+
+  ws.onerror = () => {
+    document.getElementById('ws-label').textContent = 'Error WS';
+  };
+
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+
+    if (msg.type === 'init') {
+      devices = msg.devices || {};
+      if (msg.logs) msg.logs.forEach(addLog);
+      updateUI();
+
+    } else if (msg.type === 'network_update') {
+      devices = msg.devices || devices;
+      updateUI();
+
+    } else if (msg.type === 'device_update') {
+      if (msg.device) devices[msg.device.id] = msg.device;
+      if (msg.log) addLog(msg.log);
+      if (selectedId === msg.device?.id) selectDevice(selectedId);
+      updateUI();
+
+    } else if (msg.type === 'device_added') {
+      if (msg.device) devices[msg.device.id] = msg.device;
+      if (msg.log) addLog(msg.log);
+      updateUI();
+
+    } else if (msg.type === 'device_removed') {
+      delete devices[msg.device_id];
+      if (msg.log) addLog(msg.log);
+      if (selectedId === msg.device_id) selectDevice(null);
+      updateUI();
+
+    } else if (msg.type === 'blackout') {
+      if (msg.devices) devices = msg.devices;
+      if (msg.log) addLog(msg.log);
+      updateUI();
+      notify('⚡ Corte eléctrico detectado!', 'err');
+
+    } else if (msg.type === 'restore') {
+      if (msg.devices) devices = msg.devices;
+      if (msg.log) addLog(msg.log);
+      updateUI();
+    } else if (msg.type === 'settings_update') {
+      if (msg.palettes) palettes = msg.palettes;
+      if (msg.settings?.palette) applyPalette(msg.settings.palette);
+    } else if (msg.type === 'system_reset') {
+      if (msg.devices) devices = msg.devices;
+      updateUI();
+    }
+  };
+}
+
+function openApiDocs() {
+  window.open('/api/docs', '_blank');
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// ADMIN
+// ──────────────────────────────────────────────────────────────────────────
+
+let palettes = {};
+let customPalettes = {};
+
+async function openAdmin() {
+  const res = await apiFetch('/admin/settings');
+  const palRes = await apiFetch('/admin/palettes');
+  palettes = palRes;
+  customPalettes = res.custom_palettes || {};
+
+  document.getElementById('s-mqtt-host').value = res.mqtt_host || 'localhost';
+  document.getElementById('s-sim-interval').value = res.sim_interval || 3;
+  document.getElementById('s-zoom').value = res.zoom_default || 1;
+
+  renderPaletteGrid(res.palette);
+  document.getElementById('palette-editor').style.display = 'none';
+  document.getElementById('admin-overlay').classList.add('open');
+}
+
+function renderPaletteGrid(activeName) {
+  const grid = document.getElementById('palette-grid');
+  grid.innerHTML = '';
+
+  let idx = 0;
+  for (const [name, colors] of Object.entries(palettes)) {
+    const isCustom = !!customPalettes[name];
+    const card = document.createElement('div');
+    card.className = 'palette-card' + (name === activeName ? ' active' : '') + (isCustom ? ' custom' : '');
+    card.dataset.name = name;
+    card.style.animationDelay = (idx * 30) + 'ms';
+    card.innerHTML = `
+      <div class="palette-preview">
+        <span style="background:${colors.bg}"></span>
+        <span style="background:${colors.panel}"></span>
+        <span style="background:${colors.border}"></span>
+        <span style="background:${colors.accent}"></span>
+        <span style="background:${colors.text}"></span>
+      </div>
+      <div class="palette-name">${name}</div>
+      ${isCustom ? '<button class="del-btn" onclick="event.stopPropagation();editPalette(\'' + name + '\')">✎</button>' : ''}
+    `;
+    card.onclick = () => {
+      if (isCustom) {
+        editPalette(name);
+      } else {
+        document.querySelectorAll('.palette-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        document.getElementById('palette-editor').style.display = 'none';
+        applyPalette(name);
+      }
+    };
+    grid.appendChild(card);
+    idx++;
+  }
+
+  // Add card
+  const addCard = document.createElement('div');
+  addCard.className = 'palette-card add-card';
+  addCard.innerHTML = '<span>+</span>';
+  addCard.onclick = () => editPalette(null);
+  grid.appendChild(addCard);
+}
+
+const PALETTE_LABELS = {
+  bg: 'Fondo', bg2: 'Fondo 2', bg3: 'Fondo 3',
+  panel: 'Panel', border: 'Borde', border2: 'Borde 2',
+  accent: 'Acento', accent2: 'Acento 2',
+  green: 'Verde', amber: 'Ámbar', red: 'Rojo',
+  gray: 'Gris', text: 'Texto', text2: 'Texto 2',
+};
+
+function editPalette(name) {
+  const editor = document.getElementById('palette-editor');
+  editor.style.display = 'block';
+
+  const colors = name ? palettes[name] : null;
+  const isCustom = name && customPalettes[name];
+
+  // Mark as active and apply
+  document.querySelectorAll('.palette-card').forEach(c => c.classList.remove('active'));
+  const card = document.querySelector(`.palette-card[data-name="${name}"]`);
+  if (card) card.classList.add('active');
+  if (colors) applyPalette(name);
+
+  document.getElementById('pe-name').value = name || '';
+  document.getElementById('pe-delete').style.display = isCustom ? 'block' : 'none';
+
+  const container = document.getElementById('pe-colors');
+  container.innerHTML = '';
+  const keys = Object.keys(PALETTE_LABELS);
+  for (const key of keys) {
+    const row = document.createElement('div');
+    row.className = 'pe-row';
+    row.innerHTML = `
+      <label>${PALETTE_LABELS[key]}</label>
+      <input type="color" data-key="${key}" value="${colors ? colors[key] : '#000000'}">
+      <input type="text" data-key="${key}" value="${colors ? colors[key] : '#000000'}" placeholder="#hex">
+    `;
+    const colorInput = row.querySelector('input[type="color"]');
+    const textInput = row.querySelectorAll('input[type="text"]')[0];
+    colorInput.addEventListener('input', () => {
+      textInput.value = colorInput.value;
+    });
+    textInput.addEventListener('input', () => {
+      if (/^#[0-9a-f]{6}$/i.test(textInput.value)) {
+        colorInput.value = textInput.value;
+      }
+    });
+    container.appendChild(row);
+  }
+}
+
+function cancelPaletteEdit() {
+  document.getElementById('palette-editor').style.display = 'none';
+}
+
+async function saveCustomPalette() {
+  const name = document.getElementById('pe-name').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  if (!name || name.length < 2) { notify('Nombre inválido (mín 2 caracteres)', 'err'); return; }
+
+  const colors = {};
+  document.querySelectorAll('#pe-colors .pe-row').forEach(row => {
+    const key = row.querySelector('input[type="color"]').dataset.key;
+    const val = row.querySelector('input[type="text"]').value;
+    colors[key] = val;
+  });
+
+  const res = await apiFetch('/admin/palettes', {
+    method: 'POST',
+    body: JSON.stringify({ name, colors }),
+  });
+
+  if (res.error) { notify('Error: ' + res.error, 'err'); return; }
+
+  palettes[name] = colors;
+  customPalettes[name] = colors;
+  renderPaletteGrid(name);
+  applyPalette(name);
+  document.getElementById('palette-editor').style.display = 'none';
+  notify('Paleta "' + name + '" guardada', 'ok');
+}
+
+async function deleteCustomPalette() {
+  const name = document.getElementById('pe-name').value.trim();
+  if (!name || !confirm('¿Eliminar paleta "' + name + '"?')) return;
+
+  await apiFetch('/admin/palettes/' + encodeURIComponent(name), { method: 'DELETE' });
+  delete palettes[name];
+  delete customPalettes[name];
+  renderPaletteGrid('cyberpunk');
+  applyPalette('cyberpunk');
+  document.getElementById('palette-editor').style.display = 'none';
+  notify('Paleta "' + name + '" eliminada', 'ok');
+}
+
+function closeAdmin() {
+  document.getElementById('admin-overlay').classList.remove('open');
+  document.getElementById('palette-editor').style.display = 'none';
+}
+
+async function saveAdmin() {
+  const palette = document.querySelector('.palette-card.active')?.dataset.name || 'cyberpunk';
+  const settings = {
+    palette,
+    mqtt_host: document.getElementById('s-mqtt-host').value,
+    sim_interval: parseInt(document.getElementById('s-sim-interval').value) || 3,
+    zoom_default: parseFloat(document.getElementById('s-zoom').value) || 1,
+  };
+  await apiFetch('/admin/settings', {
+    method: 'PUT',
+    body: JSON.stringify(settings),
+  });
+  notify('Configuración guardada', 'ok');
+  closeAdmin();
+}
+
+function applyPalette(name) {
+  const colors = palettes[name];
+  if (!colors) return;
+  const root = document.documentElement;
+  for (const [key, val] of Object.entries(colors)) {
+    root.style.setProperty(`--${key}`, val);
+  }
+}
+
+async function exportData() {
+  const data = await apiFetch('/admin/export');
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `iot-city-export-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  notify('Datos exportados', 'ok');
+}
+
+async function resetData() {
+  if (!confirm('¿Reiniciar todos los dispositivos a la ciudad demo?')) return;
+  const res = await apiFetch('/admin/reset', { method: 'POST' });
+  devices = {};
+  await loadDevices();
+  closeAdmin();
+  notify(`Ciudad demo reiniciada (${res.count} dispositivos)`, 'ok');
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────────────────────────────────
+
+async function init() {
+  resetView();
+  const [settings, palRes] = await Promise.all([
+    apiFetch('/admin/settings'),
+    apiFetch('/admin/palettes'),
+    loadDevices(),
+  ]);
+  palettes = palRes;
+  customPalettes = settings.custom_palettes || {};
+  const savedPal = palRes[settings.palette] || Object.values(palRes)[0];
+  if (savedPal) {
+    const root = document.documentElement;
+    for (const [key, val] of Object.entries(savedPal)) {
+      root.style.setProperty(`--${key}`, val);
+    }
+  }
+  connectWS();
+  draw();
+}
+
+init();
+</script>
+</body>
+</html>

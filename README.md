@@ -1,27 +1,26 @@
-# IoT City Full — Monorepo
+# IoT City Full
 
-Sistema de monitoreo urbano con red mesh Zigbee. Backend FastAPI + App Flutter.
+Sistema de monitoreo urbano con red mesh Zigbee.  
+Backend FastAPI + App Flutter + Cliente Qt Desktop.
+
+```
+/home/optimus/Documentos/src/flutter_src/iot_city/
+├── iot_city_web/          # Backend Python + Frontend Web
+├── iot_city_flt/          # App Flutter (móvil)
+├── iot_qt/                # Cliente Qt Desktop (C++17)
+├── .gitignore
+└── README.md
+```
 
 ---
 
-## Ramas
-
-| Rama | Contenido |
-|------|-----------|
-| `main` | Este README (visión general del monorepo) |
-| `web` | Backend Python + frontend web: `iot_city_web/` |
-| `flt` | App Flutter: `iot_city_flt/` |
-
----
-
-## Rama `web` — Backend + Frontend Web
+## iot_city_web/ — Backend + Frontend Web
 
 Servidor FastAPI con simulación de red mesh Zigbee, WebSocket en tiempo real y dashboard interactivo.
 
 ```bash
-git checkout web
+cd iot_city_web
 
-# Instalar e iniciar
 chmod +x scripts/install_system.sh
 ./scripts/install_system.sh
 ./scripts/control_system.sh start
@@ -41,46 +40,38 @@ http://localhost:5062
 
 Documentación interactiva: `http://localhost:5062/api/docs`
 
-### Scripts principales
-
-| Script | Uso |
-|--------|-----|
-| `scripts/control_system.sh` | `start/stop/restart/status/logs` |
-| `scripts/add_device.sh` | Agregar/quitar dispositivos |
-| `scripts/install_system.sh` | Instalación completa |
-
 ---
 
-## Rama `flt` — App Flutter
+## iot_city_flt/ — App Flutter
 
 Dashboard móvil con métricas urbanas, gráficos interactivos y mapa de dispositivos.
 
 ```bash
-git checkout flt
-
-# Dependencias
+cd iot_city_flt
 flutter pub get
-
-# Desarrollo
 flutter run
-
-# Producción
-flutter build apk --release
 ```
 
-### Configuración de conexión
+### Configuración
 
-Host y puerto configurables desde la app (Settings). Por defecto `ms7851.local:5062`.
+Host y puerto configurables desde la app (Settings).  
+Por defecto `ms7851.local:5062`.
 
-### Widgets principales
+---
 
-| Widget | Archivo | Descripción |
-|--------|---------|-------------|
-| `DashboardScreen` | `lib/screens/dashboard_screen.dart` | KPIs + gráficos + mapa |
-| `CityMapPainter` | `lib/widgets/map/city_map_painter.dart` | Mapa mesh con CustomPainter |
-| `DeviceMap` | `lib/widgets/map/device_map.dart` | Mapa interactivo zoom/pan |
-| `ApiService` | `lib/services/api_service.dart` | Cliente REST |
-| `WebSocketService` | `lib/services/websocket_service.dart` | WS con auto-reconnect |
+## iot_qt/ — Cliente Qt Desktop
+
+Cliente de escritorio C++17 con Qt 5.15+ / 6.x.
+
+```bash
+cd iot_qt
+mkdir build && cd build
+cmake ..
+cmake --build .
+./iot_city_qt
+```
+
+Host/puerto configurables desde **File > Configure Host** (Ctrl+H).
 
 ---
 

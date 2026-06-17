@@ -1,6 +1,27 @@
-# --- Monorepo IoT City ---
-# Cada proyecto vive en su propia rama.
-# En main solo está este README.
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
 
-iot_city_web/
-iot_city_flt/
+# Node
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs, data, temp
+*.log
+data/
+tmp/
