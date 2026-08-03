@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/). Las versio
 
 ---
 
+## [1.2.0] — 2026-08-03
+
+### Añadido
+- Skills de agente instaladas vía `skills` CLI en `.agents/skills/` (canonical) con symlinks en `.opencode/skills/` y `.claude/skills/`: `mattpocock/skills` (refactor, docs, git, TDD, debugging, code review), `anthropics/skills` (`doc-coauthoring`) y `obra/superpowers` (`using-git-worktrees`, `finishing-a-development-branch`). Lockfile `skills-lock.json` para reproducibilidad.
+
 ## [1.1.1] — 2026-08-03
 
 ### Corregido
