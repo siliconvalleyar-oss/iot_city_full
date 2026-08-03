@@ -81,7 +81,8 @@ class NodeConfig:
 
         b0 = ((self.tx_power_level & 0x03) << 6) | duty_q
         b1 = interval_q
-        b2 = (agg_q << 4) | sleep_q
+        # Firmware (iot_city_node.h): B2 = [7:4] agg | [3:2] sleep_mode | [1:0] rsvd
+        b2 = (agg_q << 4) | (sleep_q << 2)
 
         return bytes([b0, b1, b2])
 
@@ -96,7 +97,7 @@ class NodeConfig:
         duty_q = b0 & 0x3F
         interval_q = b1
         agg_q = (b2 >> 4) & 0x0F
-        sleep_q = b2 & 0x03
+        sleep_q = (b2 >> 2) & 0x03
 
         sleep_modes = {0: "none", 1: "power_save", 2: "deep_sleep"}
 
@@ -621,6 +622,21 @@ class EnergyOptimizer:
         model.tx_interval_s = cfg.tx_interval_s
         model.aggregation_ratio = max(1, cfg.aggregation_size)
         return model.compute_instant_power_mW()["power_mW"]
+
+    def sync_to_metrics(self, nodes: Dict) -> None:
+        """
+        Sincroniza la configuración optimizada hacia los modelos de métricas.
+        Evita la divergencia entre EnergyOptimizer.node_configs y
+        MetricsEngine.nodes (una sola fuente de verdad efectiva).
+        """
+        for nid, cfg in self.node_configs.items():
+            model = nodes.get(nid)
+            if model is None:
+                continue
+            model.tx_power_level = cfg.tx_power_level
+            model.duty_cycle = cfg.duty_cycle
+            model.tx_interval_s = cfg.tx_interval_s
+            model.aggregation_ratio = max(1.0, float(cfg.aggregation_size))
 
     def get_recommendations(self, devices: Dict) -> List[Dict]:
         """Genera lista de recomendaciones priorizadas."""

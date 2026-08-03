@@ -12,21 +12,22 @@ Monolito FastAPI con estado en memoria, WebSocket para tiempo real, MQTT "decora
 
 ## 2. Hallazgos críticos (bugs reales)
 
-### MQTT no funcional (doble bug)
-- `backend/main.py:172-173`: `did = parts[2]` extrae `"device"` en vez del id real (`parts[3]`). Todo el path de ingesta MQTT es código muerto.
-- `backend/main.py:178-181`: `asyncio.get_event_loop()` dentro del thread de paho lanza `RuntimeError` en Python 3.12. Debe guardarse la referencia al loop del main thread.
-- Consecuencia: los simuladores publican a `iot/city/device/{id}/telemetry` pero el backend los ignora en silencio. La única sincronización real es el archivo compartido `data/devices.json`.
+### MQTT no funcional (doble bug) — CORREGIDO en v1.1.1
+- `backend/main.py`: `did = parts[2]` extraía `"device"` en vez del id real (`parts[3]`). Toda la ingesta MQTT era código muerto.
+- `backend/main.py`: `asyncio.get_event_loop()` dentro del thread de paho lanzaba `RuntimeError` en Python 3.12.
+- **Fix:** `parts[3]` + captura del loop en `setup_mqtt()` (main thread).
+- Consecuencia histórica: los simuladores publicaban a `iot/city/device/{id}/telemetry` pero el backend los ignoraba en silencio.
 
 ### Tres fuentes de verdad para el mismo dominio
 `backend/simulate_network`, `simulator/mesh_simulator.py` y `mqtt/gateway_simulator.py` mutan/publican el mismo `devices.json` con reglas distintas. El simulador mesh además:
-- Escribe con `get_state()` que **omite** `street`, `icon`, `color`, `end_devices`, `cameras` → destruye el esquema (`simulator/mesh_simulator.py:80-95`).
-- Nunca relee el archivo → revierte cambios hechos desde el frontend.
+- Solía escribir con `get_state()` omitiendo `street`, `icon`, `color`, `end_devices`, `cameras` → destruía el esquema. **CORREGIDO en v1.1.1** (conserva el dict original).
+- Nunca relee el archivo → revierte cambios hechos desde el frontend. **Pendiente.**
 
-### Configuración duplicada y divergente
-`MetricsEngine.nodes[id]` y `EnergyOptimizer.node_configs[id]` mantienen la misma configuración por separado, inicializada con aleatorios distintos. Aplicar optimización en uno no se refleja en el otro (`analytics/metrics_engine.py:541-590` vs `energy/optimizer.py:526`).
+### Configuración duplicada y divergente — CORREGIDO en v1.1.1
+`MetricsEngine.nodes[id]` y `EnergyOptimizer.node_configs[id]` mantenían la misma configuración por separado, inicializada con aleatorios distintos. Aplicar optimización en uno no se reflejaba en el otro. **Fix:** `EnergyOptimizer.sync_to_metrics()` + sincronización en `dashboard/api.py` (ciclo, apply, apply_all, PATCH).
 
-### Contrato de firmware de 3 bytes roto
-El `sleep_mode` se serializa en bits [1:0] en `energy/optimizer.py:84,99` pero el firmware lo espera en bits [3:2] (`firmware_snippets/iot_city_node.h:214,223`). Cualquier config con sleep != none se corrompe.
+### Contrato de firmware de 3 bytes roto — CORREGIDO en v1.1.1
+El `sleep_mode` se serializaba en bits [1:0] en `energy/optimizer.py` pero el firmware lo espera en bits [3:2] (`firmware_snippets/iot_city_node.h`). Cualquier config con sleep != none se corrompía. **Fix:** alineado a bits [3:2] con round-trip verificado.
 
 ### El "5º algoritmo" no existe
 La documentación anuncia 5 algoritmos pero `energy/optimizer.py` solo implementa 4. **Sleep Mode Scheduling** solo existe en firmware.
@@ -68,8 +69,9 @@ La documentación anuncia 5 algoritmos pero `energy/optimizer.py` solo implement
 
 ## 7. Recomendaciones prioritarias (para evitar regresiones)
 
-1. Arreglar el parseo MQTT (`parts[3]`) y el loop reference.
-2. Hacer una sola fuente de verdad de configuración de nodos.
-3. Sincronizar el bit layout del contrato de 3 bytes con el firmware.
-4. Reescribir `docs/GLOSSARY.md` para IoT City o eliminarlo.
-5. Añadir tests unitarios (ver `docs/TESTING.md` cuando exista).
+1. ✅ Arreglado el parseo MQTT (`parts[3]`) y la referencia al event loop (v1.1.1).
+2. ✅ Unificada la fuente de verdad de configuración de nodos (`sync_to_metrics`, v1.1.1).
+3. ✅ Sincronizado el bit layout del contrato de 3 bytes con el firmware (v1.1.1).
+4. Reescribir `docs/GLOSSARY.md` para IoT City o eliminarlo. → ✅ Hecho en v1.1.0.
+5. Añadir tests unitarios (ver `docs/TESTING.md` cuando exista). **Pendiente.**
+6. El simulador mesh no relee `devices.json` (revierte cambios del frontend). **Pendiente.**

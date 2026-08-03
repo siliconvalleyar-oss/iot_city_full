@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/). Las versio
 
 ---
 
+## [1.1.1] — 2026-08-03
+
+### Corregido
+- **MQTT ingesta** (`backend/main.py`): parseo del device id (`parts[3]` en vez de `parts[2]`) y captura del event loop en el main thread para los callbacks de paho. La telemetría de los simuladores ya se procesa.
+- **Contrato de 3 bytes** (`energy/optimizer.py`): `sleep_mode` alineado a bits [3:2] de B2, compatible con `firmware_snippets/iot_city_node.h` (ver `SERIALIZATION.md`).
+- **Pérdida de esquema en `devices.json`** (`simulator/mesh_simulator.py`): `get_state()` conserva `street`, `icon`, `color`, `end_devices`, `cameras` y demás campos originales; ya no degrada el archivo al persistir.
+- **Configuración divergente metrics/optimizer**: nueva `EnergyOptimizer.sync_to_metrics()` y sincronización en `dashboard/api.py` (ciclo de optimización, `apply`, `apply_all`, PATCH config). Una sola fuente de verdad efectiva.
+
 ## [1.1.0] — 2026-08-03
 
 ### Añadido

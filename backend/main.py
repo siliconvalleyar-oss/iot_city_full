@@ -156,6 +156,9 @@ def setup_mqtt():
     global MQTT_CLIENT
     try:
         client = mqtt.Client(client_id="iot-city-backend")
+        # Capturamos el loop del thread principal: los callbacks de paho corren
+        # en el thread de red y no pueden llamar a asyncio.get_event_loop().
+        loop = asyncio.get_event_loop()
 
         def on_connect(c, userdata, flags, rc):
             if rc == 0:
@@ -170,14 +173,15 @@ def setup_mqtt():
                 topic = msg.topic
                 if "device/" in topic:
                     parts = topic.split("/")
-                    did = parts[2] if len(parts) > 2 else None
+                    # Topic: iot/city/device/{id}/telemetry  →  parts[3] es el id
+                    did = parts[3] if len(parts) > 3 else None
                     if did and did in DEVICES:
                         DEVICES[did].update(payload)
                         DEVICES[did]["last_seen"] = time.time()
                         save_devices(DEVICES)
                         asyncio.run_coroutine_threadsafe(
                             broadcast({"type": "device_update", "device": DEVICES[did]}),
-                            asyncio.get_event_loop()
+                            loop
                         )
             except Exception as e:
                 print(f"MQTT msg error: {e}")

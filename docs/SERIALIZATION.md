@@ -30,14 +30,14 @@ B2: [7:4] = aggregation_size (4 bits) → 1–8
 | `aggregation_size` | B2[7:4] | 1–8 | 1 |
 | `sleep_mode` | B2[3:2] | 0–3 | 1 |
 
-### ⚠️ Bug de interoperabilidad (crítico)
+### ⚠️ Bug de interoperabilidad (crítico) — CORREGIDO en v1.1.1
 
-El backend **no sigue este layout**. En `energy/optimizer.py`:
+El backend **no seguía** el layout del firmware. En `energy/optimizer.py`:
 
 ```python
-b2 = (agg_q << 4) | sleep_q          # sleep_mode en bits [1:0] ← INCORRECTO
+b2 = (agg_q << 4) | sleep_q          # sleep_mode en bits [1:0] ← INCORRECTO (v1.1.0)
 ...
-sleep = (b2 & 0x03)                   # lee bits [1:0] ← INCORRECTO
+sleep = (b2 & 0x03)                   # lee bits [1:0] ← INCORRECTO (v1.1.0)
 ```
 
 Mientras el firmware (`iot_city_node.h:214,223`) usa:
@@ -47,7 +47,7 @@ raw->b2 = (agg_q << 4) | (slp_q << 2);  // sleep_mode en bits [3:2]
 sleep_q = (raw->b2 >> 2) & 0x03;
 ```
 
-**Consecuencia:** cualquier configuración con `sleep_mode != none` serializada por el backend se decodifica corrupta en el nodo (y viceversa). **Corrección pendiente** (ver `LEARNINGS.md` §7 y `TODO.md`).
+**Estado:** corregido en v1.1.1 — `to_firmware_bytes()`/`from_firmware_bytes()` ahora usan bits [3:2], verificado con round-trip (sleep `none`/`power_save`/`deep_sleep`).
 
 ### Round-trip
 
@@ -74,7 +74,7 @@ Frame agregado (`AggregatedFrame`): `msg_type` (0xA1) + `count` + muestras de 8 
 
 ## 3. Devices en disco (JSON)
 
-`data/devices.json` es un mapa `{ "id": { ...device } }`. **⚠️ Ojo con la pérdida de campos:** `simulator/mesh_simulator.py` (`get_state()`, líneas 80-95) escribe un subconjunto que **omite** `street`, `icon`, `color`, `end_devices`, `cameras`. Tras unos ciclos del simulador, el archivo queda con esquema degradado.
+`data/devices.json` es un mapa `{ "id": { ...device } }`. **⚠️ Pérdida de campos (CORREGIDA en v1.1.1):** `simulator/mesh_simulator.py` (`get_state()`) solía escribir un subconjunto que **omitía** `street`, `icon`, `color`, `end_devices`, `cameras`, degradando el esquema del archivo tras unos ciclos. Ahora conserva el dict original completo y actualiza solo los campos simulados.
 
 ```json
 {

@@ -44,8 +44,28 @@ def init_dashboard(devices: Dict):
     metrics = MetricsEngine()
     optimizer = EnergyOptimizer()
     optimizer.init_nodes(devices)
+    optimizer.sync_to_metrics(metrics.nodes)
 
     return metrics, optimizer
+
+
+def _sync_config(node_id: str, config: dict) -> None:
+    """Sincroniza una configuración manual al optimizador y al motor de métricas."""
+    global metrics, optimizer
+    if optimizer and node_id in optimizer.node_configs:
+        cfg = optimizer.node_configs[node_id]
+        if "tx_power_level" in config:
+            cfg.tx_power_level = config["tx_power_level"]
+        if "duty_cycle" in config:
+            cfg.duty_cycle = config["duty_cycle"]
+        if "tx_interval_s" in config:
+            cfg.tx_interval_s = config["tx_interval_s"]
+        if "aggregation_size" in config:
+            cfg.aggregation_size = config["aggregation_size"]
+        if "sleep_mode" in config:
+            cfg.sleep_mode = config["sleep_mode"]
+    if optimizer and metrics:
+        optimizer.sync_to_metrics(metrics.nodes)
 
 
 async def dashboard_tick(devices: Dict):
@@ -65,6 +85,7 @@ async def dashboard_tick(devices: Dict):
     opt_result = None
     if int(time.time()) % 10 == 0:
         opt_result = optimizer.run_optimization_cycle(devices)
+        optimizer.sync_to_metrics(metrics.nodes)
 
     # Persistir snapshot periódicamente (cada 60s)
     if int(time.time()) % 60 == 0:
@@ -189,6 +210,7 @@ async def apply_optimization(node_id: str, strategy: str):
     result = metrics.apply_optimization(node_id, strategy)
     if "error" in result:
         raise HTTPException(400, result["error"])
+    _sync_config(node_id, result.get("new_config", {}))
     return result
 
 
@@ -209,6 +231,7 @@ async def apply_all_recommendations():
         best_issue = max(rec["issues"], key=lambda i: i["saving_est_pct"])
         result = metrics.apply_optimization(nid, best_issue["action"])
         applied.append(result)
+        _sync_config(nid, result.get("new_config", {}))
 
     total_saving = sum(r.get("saving_mW", 0) for r in applied)
     return {
@@ -270,6 +293,9 @@ async def update_node_config(node_id: str, update: NodeConfigUpdate):
 
     for key, val in changes.items():
         setattr(cfg, key, val)
+
+    if metrics:
+        optimizer.sync_to_metrics(metrics.nodes)
 
     from dataclasses import asdict
     return {

@@ -47,9 +47,16 @@ class ZigbeeNode:
         self.consumption = device_data.get("consumption", 50.0)
         self.signal = device_data.get("signal", -60.0)
         self.connected_to = device_data.get("connected_to", [])
-        self.packets_sent = 0
-        self.packets_received = 0
+        self.packets_sent = device_data.get("packets_sent", 0)
+        self.packets_received = device_data.get("packets_received", 0)
         self.fail_probability = 0.001  # 0.1% por ciclo
+        # Conservar el resto del esquema (street, icon, color, end_devices,
+        # cameras...) para no degradar devices.json al persistir.
+        self._extra = {k: v for k, v in device_data.items() if k not in {
+            "id", "device_type", "x", "y", "active", "powered", "level",
+            "consumption", "signal", "connected_to", "packets_sent",
+            "packets_received"
+        }}
 
     def simulate_tick(self) -> Dict:
         """Simula un ciclo de la red."""
@@ -78,7 +85,8 @@ class ZigbeeNode:
         return self.get_state()
 
     def get_state(self) -> Dict:
-        return {
+        state = dict(self._extra)
+        state.update({
             "id": self.id,
             "device_type": self.device_type,
             "x": self.x,
@@ -92,7 +100,8 @@ class ZigbeeNode:
             "packets_sent": self.packets_sent,
             "packets_received": self.packets_received,
             "last_seen": time.time()
-        }
+        })
+        return state
 
 
 class MeshNetwork:
